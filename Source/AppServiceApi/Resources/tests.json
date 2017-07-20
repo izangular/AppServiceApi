@@ -1,0 +1,591 @@
+﻿{
+    "variables": [ ],
+    "info": {
+        "name": "Service.Wizard",
+        "_postman_id": "60c5b2d1-06c9-b2f3-bdc4-c44ce774c90a",
+        "description": "",
+        "schema": "https://schema.getpostman.com/json/collection/v2.0.0/collection.json"
+    },
+    "item": [
+        {
+            "id": "10001",
+            "name": "A1 Build Quality",
+            "testType": 4,
+            "request": {
+                "url": "{{servername}}/wizard/v1/a1/buildquality",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "{{token_type}} {{access_token}}"
+
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": [
+                        {
+                            "externalKey": "BuildQualityA1",
+                            "heatDistributionCode": 2,
+                            "heatInsulationCode": 1,
+                            "kitchenBathCode": 1,
+                            "neighborhoodCode": 2,
+                            "noiseProtectionCode": 1,
+                            "roomLayoutCode": 1,
+                            "solarCollectorFlag": 0
+                        }
+                    ]
+                }
+            },
+            "response": {
+                "status": "OK",
+                "data": [
+                    {
+                        "externalKey": "BuildQualityA1",
+                        "cultureOutput": "de-CH",
+                        "cultureOutputDisplay": "German (Switzerland)",
+                        "qualityCode": 1,
+                        "qualityCodeText": "Berechnet mit fehlenden Daten ",
+                        "score": 1.5,
+                        "status": 0,
+                        "scoreText": "Sehr gut - Gut",
+                        "statusText": "Berechnung erfolgreich"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "10002",
+            "name": "A1 Build Condition ",
+            "testType": 4,
+            "request": {
+                "url": "{{servername}}/wizard/v1/a1/buildcondition",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "{{token_type}} {{access_token}}"
+
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": [
+                        {
+                            "externalKey": "BuildConditionA1",
+                            "facadeCode": 1,
+                            "conditionRoofCode": 1,
+                            "secondaryRoomsCode": 1,
+                            "electricCode": 2,
+                            "sanitaryHeatingCode": 2,
+                            "dampDamageHouseCode": 1,
+                            "liftNb": 1,
+                            "conditionLiftCode": 2,
+                            "conditionLivingCode": 2,
+                            "conditionKitchenBathCode": 2
+                        }
+                    ]
+                }
+            },
+            "response": {
+                "status": "OK",
+                "data": [
+                    {
+                        "externalKey": "BuildConditionA1",
+                        "cultureOutput": "de-CH",
+                        "cultureOutputDisplay": "German (Switzerland)",
+                        "qualityCode": 0,
+                        "qualityCodeText": "Berechnet mit kompletten Daten ",
+                        "score": 2.0,
+                        "status": 0,
+                        "scoreText": "Gut",
+                        "statusText": "Berechnung erfolgreich"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "10003",
+            "name": "A1 Quality Micro ",
+            "testType": 4,
+            "request": {
+                "url": "{{servername}}/wizard/v1/a1/qualitymicro",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "{{token_type}} {{access_token}}"
+
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": [
+                        {
+                            "externalKey": "QualityMicroA1",
+                            "distancePlaySchoolCode": 1,
+                            "distanceSchoolCode": 2,
+                            "distanceShoppingCode": 1,
+                            "distanceTravelStopCode": 1,
+                            "noiseExposureCode": 2,
+                            "noiseSourceCode": 2,
+                            "solarRadiationCode": 2,
+                            "uniqueSituationFlag": 0,
+                            "vistaCode": 2
+                        }
+                    ]
+                }
+            },
+            "response": {
+                "status": "OK",
+                "data": [
+                    {
+                        "externalKey": "QualityMicroA1",
+                        "cultureOutput": "de-CH",
+                        "cultureOutputDisplay": "German (Switzerland)",
+                        "qualityCode": 1,
+                        "qualityCodeText": "Berechnet mit fehlenden Daten ",
+                        "score": 2.5,
+                        "status": 0,
+                        "scoreText": "Sehr gut - Gut",
+                        "statusText": "Berechnung erfolgreich"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "20001",
+            "name": "A2 Build Quality ",
+            "testType": 4,
+            "request": {
+                "url": "{{servername}}/wizard/v1/a2/buildquality",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "{{token_type}} {{access_token}}"
+
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": [
+                        {
+                            "externalKey": "BuildQualityA2",
+                            "heatInsulationCode": 1,
+                            "kitchenBathCode": 2,
+                            "neighborhoodCode": 1,
+                            "noiseProtectionCode": 1,
+                            "roomLayoutCode": 1,
+                            "solarCollectorFlag": 1
+                        }
+                    ]
+                }
+            },
+            "response": {
+                "status": "OK",
+                "data": [
+                    {
+                        "externalKey": "BuildQualityA2",
+                        "cultureOutput": "de-CH",
+                        "cultureOutputDisplay": "German (Switzerland)",
+                        "qualityCode": 1,
+                        "qualityCodeText": "Berechnet mit fehlenden Daten ",
+                        "score": 1.0,
+                        "status": 0,
+                        "scoreText": "Sehr gut",
+                        "statusText": "Berechnung erfolgreich"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "20002",
+            "name": "A2 Build Condition ",
+            "testType": 4,
+            "request": {
+                "url": "{{servername}}/wizard/v1/a2/buildcondition",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "{{token_type}} {{access_token}}"
+
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": [
+                        {
+                            "externalKey": "BuildConditionA2",
+                            "conditionRoofCode": 1,
+                            "electricCode": 2,
+                            "sanitaryHeatingCode": 1,
+                            "liftNb": 2,
+                            "conditionLiftCode": 2,
+                            "conditionLivingCode": 1,
+                            "conditionKitchenBathCode": 1,
+                            "dampDamageCode": 1
+                        }
+                    ]
+                }
+            },
+            "response": {
+                "status": "OK",
+                "data": [
+                    {
+                        "externalKey": "BuildConditionA2",
+                        "cultureOutput": "de-CH",
+                        "cultureOutputDisplay": "German (Switzerland)",
+                        "qualityCode": 1,
+                        "qualityCodeText": "Berechnet mit fehlenden Daten ",
+                        "score": 1.0,
+                        "status": 0,
+                        "scoreText": "Sehr gut",
+                        "statusText": "Berechnung erfolgreich"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "20003",
+            "name": "A2 Quality Micro ",
+            "testType": 4,
+            "request": {
+                "url": "{{servername}}/wizard/v1/a2/qualitymicro",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "{{token_type}} {{access_token}}"
+
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": [
+                        {
+                            "externalKey": "QualityMicroA2",
+                            "distancePlaySchoolCode": 1,
+                            "distanceSchoolCode": 2,
+                            "distanceShoppingCode": 1,
+                            "distanceTravelStopCode": 1,
+                            "noiseExposureCode": 2,
+                            "solarRadiationCode": 2,
+                            "uniqueSituationFlag": 0,
+                            "vistaCode": 2,
+                            "primSecFlag": 0
+                        }
+                    ]
+                }
+            },
+            "response": {
+                "status": "OK",
+                "data": [
+                    {
+                        "externalKey": "QualityMicroA2",
+                        "cultureOutput": "de-CH",
+                        "cultureOutputDisplay": "German (Switzerland)",
+                        "qualityCode": 1,
+                        "qualityCodeText": "Berechnet mit fehlenden Daten ",
+                        "score": 2.5,
+                        "status": 0,
+                        "scoreText": "Sehr gut - Gut",
+                        "statusText": "Berechnung erfolgreich"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "30001",
+            "name": "A3 Build Quality ",
+            "testType": 4,
+            "request": {
+                "url": "{{servername}}/wizard/v1/a3/buildquality",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "{{token_type}} {{access_token}}"
+
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": [
+                        {
+                            "externalKey": "BuildQualityA3",
+                            "heatInsulationCode": 1,
+                            "heatDistributionCode": 1,
+                            "heatGenerationCode": 2,
+                            "kitchenBathCode": 2,
+                            "neighborhoodCode": 2,
+                            "noiseProtectionCode": 1,
+                            "roomLayoutCode": 2
+                        }
+                    ]
+                }
+            },
+            "response": {
+                "status": "OK",
+                "data": [
+                    {
+                        "externalKey": "BuildQualityA3",
+                        "cultureOutput": "de-CH",
+                        "cultureOutputDisplay": "German (Switzerland)",
+                        "qualityCode": 1,
+                        "qualityCodeText": "Berechnet mit fehlenden Daten ",
+                        "score": 1.5,
+                        "status": 0,
+                        "scoreText": "Sehr gut - Gut",
+                        "statusText": "Berechnung erfolgreich"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "30002",
+            "name": "A3 Build Condition ",
+            "testType": 4,
+            "request": {
+                "url": "{{servername}}/wizard/v1/a3/buildcondition",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "{{token_type}} {{access_token}}"
+
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": [
+                        {
+                            "externalKey": "BuildConditionA3",
+                            "facadeCode": 3,
+                            "conditionRoofCode": 2,
+                            "electricCode": 2,
+                            "sanitaryHeatingCode": 1,
+                            "liftNb": 2,
+                            "conditionLiftCode": 2
+                        }
+                    ]
+                }
+            },
+            "response": {
+                "status": "OK",
+                "data": [
+                    {
+                        "externalKey": "BuildConditionA3",
+                        "cultureOutput": "de-CH",
+                        "cultureOutputDisplay": "German (Switzerland)",
+                        "qualityCode": 1,
+                        "qualityCodeText": "Berechnet mit fehlenden Daten ",
+                        "score": 2.0,
+                        "status": 0,
+                        "scoreText": "Gut",
+                        "statusText": "Berechnung erfolgreich"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "30003",
+            "name": "A3 Flat Condition ",
+            "testType": 4,
+            "request": {
+                "url": "{{servername}}/wizard/v1/a3/flatcondition",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "{{token_type}} {{access_token}}"
+
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": [
+                        {
+                            "externalKey": "FlatConditionA3",
+                            "conditionFloorCode": 2,
+                            "conditionKitchenBathCode": 2,
+                            "conditionLivingCode": 1,
+                            "dampDamageFlatCode": 1,
+                            "conditionOutdoorCode": 3,
+                            "conditionTechnicalFacilityCode": 3,
+                            "conditionWallCielingCode": 2
+                        }
+                    ]
+                }
+            },
+            "response": {
+                "status": "OK",
+                "data": [
+                    {
+                        "externalKey": "FlatConditionA3",
+                        "cultureOutput": "de-CH",
+                        "cultureOutputDisplay": "German (Switzerland)",
+                        "qualityCode": 1,
+                        "qualityCodeText": "Berechnet mit fehlenden Daten ",
+                        "score": 2.0,
+                        "status": 0,
+                        "scoreText": "Gut",
+                        "statusText": "Berechnung erfolgreich"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "30004",
+            "name": "A3 Quality Flat House ",
+            "testType": 4,
+            "request": {
+                "url": "{{servername}}/wizard/v1/a3/qualityflathouse",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "{{token_type}} {{access_token}}"
+
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": [
+                        {
+                            "externalKey": "QualityFlatHouseA3",
+                            "flatNoiseProtectionCode": 2,
+                            "flatPositionCode": 3,
+                            "flatReachCode": 2,
+                            "flatViewSolarCode": 2,
+                            "floor": 5,
+                            "typeFlatCode": 3
+                        }
+                    ]
+                }
+            },
+            "response": {
+                "status": "OK",
+                "data": [
+                    {
+                        "externalKey": "QualityFlatHouseA3",
+                        "cultureOutput": "de-CH",
+                        "cultureOutputDisplay": "German (Switzerland)",
+                        "qualityCode": 1,
+                        "qualityCodeText": "Berechnet mit fehlenden Daten ",
+                        "score": 2.5,
+                        "status": 0,
+                        "scoreText": "Gut - Mittel",
+                        "statusText": "Berechnung erfolgreich"
+                    }
+                ]
+            }
+        },
+        {
+            "id": "30005",
+            "name": "A3 Micro Quality ",
+            "testType": 4,
+            "request": {
+                "url": "{{servername}}/wizard/v1/a3/qualitymicro",
+                "method": "POST",
+                "header": [
+                    {
+                        "key": "Content-Type",
+                        "value": "application/json"
+
+                    },
+                    {
+                        "key": "Authorization",
+                        "value": "{{token_type}} {{access_token}}"
+
+                    }
+                ],
+                "body": {
+                    "mode": "raw",
+                    "raw": [
+                        {
+                            "externalKey": "QualityMicroA3",
+                            "distancePlaySchoolCode": 2,
+                            "distanceSchoolCode": 3,
+                            "distanceShoppingCode": 2,
+                            "distanceTravelStopCode": 2,
+                            "distanceRecreationCode": 2,
+                            "noiseExposureCode": 1,
+                            "solarRadiationCode": 2,
+                            "uniqueSituationFlag": 0,
+                            "vistaCode": 3,
+                            "primSecFlag": 0
+                        }
+                    ]
+                }
+            },
+            "response": {
+                "status": "OK",
+                "data": [
+                    {
+                        "externalKey": "QualityMicroA3",
+                        "cultureOutput": "de-CH",
+                        "cultureOutputDisplay": "German (Switzerland)",
+                        "qualityCode": 1,
+                        "qualityCodeText": "Berechnet mit fehlenden Daten ",
+                        "score": 2.5,
+                        "status": 0,
+                        "scoreText": "Sehr gut - Gut",
+                        "statusText": "Berechnung erfolgreich"
+                    }
+                ]
+            }
+        }
+    ]
+}
