@@ -1,6 +1,7 @@
 ﻿using AppServiceApi.Util.Helper;
 using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Drawing;
 using System.IO;
 using System.Linq;
@@ -63,8 +64,11 @@ namespace AppServiceApi.Controllers
         private string getImageAndConvertbase64()
         {
             //string path = @"D:\Workspaces\AppServiceApi\AppServiceApi\Source\AppServiceApi\Resources\Images\Commercial1.jpg";
-            string path = @"D:\Workspaces\AppServiceApi\AppServiceApi\Source\AppServiceApi\Resources\Images\Comercial 2.jpg";
+            //string path = @"D:\Workspaces\AppServiceApi\AppServiceApi\Source\AppServiceApi\Resources\Images\Comercial 2.jpg";
             //string path = @"D:\Workspaces\AppServiceApi\AppServiceApi\Source\AppServiceApi\Resources\Images\imagereader4.jpg";
+
+
+            string path = ConfigurationManager.AppSettings["Testimages"];
             using (Image image = Image.FromFile(path))
                 {
                     using (MemoryStream m = new MemoryStream())
