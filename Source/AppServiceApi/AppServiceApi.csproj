@@ -142,6 +142,11 @@
   <ItemGroup>
     <EmbeddedResource Include="doc\html\index.html" />
     <Content Include="Global.asax" />
+    <Content Include="Resources\Images\Comercial 2.jpg" />
+    <Content Include="Resources\Images\Commercial 3.jpg" />
+    <Content Include="Resources\Images\Commercial1.jpg" />
+    <Content Include="Resources\Images\imagereader1.jpg" />
+    <Content Include="Resources\Images\imagereader4.jpg" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>
@@ -151,12 +156,25 @@
     <Compile Include="App_Start\SwaggerConfig.cs" />
     <Compile Include="App_Start\WebApiConfig.cs" />
     <Compile Include="Controllers\BaseController.cs" />
+    <Compile Include="Controllers\ImageController.cs" />
     <Compile Include="Global.asax.cs">
       <DependentUpon>Global.asax</DependentUpon>
     </Compile>
+    <Compile Include="Models\ApiInput.cs" />
+    <Compile Include="Models\AppraisalOutput.cs" />
+    <Compile Include="Models\GoogleVisionApiInput.cs" />
+    <Compile Include="Models\GoogleVisionApiOutput.cs" />
+    <Compile Include="Models\Price.cs" />
+    <Compile Include="Models\Rating.cs" />
     <Compile Include="Models\UtilAuth.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Startup.cs" />
+    <Compile Include="Managers\APIManager.cs" />
+    <Compile Include="Util\Helper\AuthTokenHelper.cs" />
+    <Compile Include="Util\Helper\GoogleVisionApi.cs" />
+    <Compile Include="Util\Helper\IAZIClient.cs" />
+    <Compile Include="Util\Helper\IAZIClientSync.cs" />
+    <Compile Include="Util\Helper\ReverseGeoCodeHelper.cs" />
     <Compile Include="Util\Log\Log4NetExceptionLogger.cs" />
     <Compile Include="Util\Misc\ExceptionHelper.cs" />
   </ItemGroup>
@@ -167,12 +185,6 @@
     <Content Include="Resources\tests.json" />
     <None Include="Properties\PublishProfiles\WS_Folder.pubxml">
       <SubType>Designer</SubType>
-    </None>
-    <None Include="Web.Debug.config">
-      <DependentUpon>Web.config</DependentUpon>
-    </None>
-    <None Include="Web.Release.config">
-      <DependentUpon>Web.config</DependentUpon>
     </None>
   </ItemGroup>
   <ItemGroup>
@@ -199,7 +211,9 @@
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>60322</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>
-          <IISUrl>http://localhost:47000/api/util</IISUrl>
+          <IISUrl>http://localhost:46000/</IISUrl>
+          <OverrideIISAppRootUrl>True</OverrideIISAppRootUrl>
+          <IISAppRootUrl>http://localhost:46000/</IISAppRootUrl>
           <NTLMAuthentication>False</NTLMAuthentication>
           <UseCustomServer>False</UseCustomServer>
           <CustomServerUrl>

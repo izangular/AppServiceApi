@@ -12,8 +12,7 @@ namespace AppServiceApi.Models
 
     public class UtilAuth
     {
-        public bool ModelBase { get; set; }
-        public bool Bionic { get; set; }
+        public bool ModelBase { get; set; }        
     }
     
 }

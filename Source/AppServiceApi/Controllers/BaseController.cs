@@ -36,7 +36,7 @@ namespace AppServiceApi.Controllers
         [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IHttpActionResult> Get()
         {
-            return Ok(await Task.Run(() => { return "IAZI Service Utilities " + ConfigurationManager.AppSettings["ApiVersion"]; }));
+            return Ok(await Task.Run(() => { return "ApiService " + ConfigurationManager.AppSettings["ApiVersion"]; }));
         }
 
         protected bool IsAuthorised(out string errorMessage)
