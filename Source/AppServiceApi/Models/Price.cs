@@ -29,6 +29,7 @@ namespace AppServiceApi.Models
         public double roomNb { get; set; }
         public int bathNb { get; set; }
         public double qualityMicro { get; set; }
+        public int? surfaceGround { get; set; }
 
     }
     public class PriceOutput

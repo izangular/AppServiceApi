@@ -7,12 +7,12 @@ namespace AppServiceApi.Models
 {
     public class BaseAuth
     {
-        public UtilAuth Util { get; set; }
+        public appService appService { get; set; }
     }
 
-    public class UtilAuth
+    public class appService
     {
-        public bool ModelBase { get; set; }        
+        public bool modebase { get; set; }
     }
     
 }

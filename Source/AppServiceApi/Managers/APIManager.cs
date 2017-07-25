@@ -3,6 +3,7 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System;
 using System.Configuration;
+using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
 
@@ -11,7 +12,7 @@ namespace AppServiceApi.Util.Helper
 {
     public class APIManager 
     {
-        String token = "";
+        public String token = "";
         public String Response;
         public RatingResponse ratingResponse;
         public ReverseGeoCodeResult reverseGeoCodeResult;
@@ -19,9 +20,13 @@ namespace AppServiceApi.Util.Helper
         JObject resultResponse = null;        
          
 
-        public APIManager()
+        public APIManager(string srctoken)
         {
-            token = AuthTokenHelper.GetAuthToken();
+            if (srctoken == null || srctoken.Length <= 0)
+                token = AuthTokenHelper.GetAuthToken();
+            else
+                token = srctoken;
+
             iaziClientsync = new IAZIClientSync();
         }
 
@@ -30,38 +35,101 @@ namespace AppServiceApi.Util.Helper
             AppraisalOutput appraisalOutput = new AppraisalOutput();
             GoogleVisionApi googleVisionApi = new GoogleVisionApi();
             PriceInput priceInput = new PriceInput();
+            int category;
 
-            int category = googleVisionApi.fetchCategoryForImage(imageBase64);
+            try
+            {
+                category = googleVisionApi.fetchCategoryForImage(imageBase64);
+            }
+            catch(Exception)
+            {
+                imageBase64 = getImageAndConvertbase64();
+                category = googleVisionApi.fetchCategoryForImage(imageBase64);
+            }
+
             getMicroRating(category, latitude, longitude);
             getAddressForLatLong(latitude, longitude);
 
-            priceInput.qualityMicro = appraisalOutput.Rating = ratingResponse.results.microRatingClass1To5 ?? 3;
-            priceInput.zip = appraisalOutput.Zip = reverseGeoCodeResult.Zip;
-            priceInput.town = appraisalOutput.Town = reverseGeoCodeResult.Town;
-            priceInput.street = appraisalOutput.Street = reverseGeoCodeResult.Street;
-            appraisalOutput.Country = reverseGeoCodeResult.Country;
+            priceInput.qualityMicro = appraisalOutput.rating = ratingResponse.results.microRatingClass1To5 ?? 3;
+            priceInput.zip = appraisalOutput.zip = reverseGeoCodeResult.Zip;
+            priceInput.town = appraisalOutput.town = reverseGeoCodeResult.Town;
+            priceInput.street = appraisalOutput.street = reverseGeoCodeResult.Street;
+            appraisalOutput.country = reverseGeoCodeResult.Country;
+            appraisalOutput.CatCode = category;
             
             switch(category)
             {
                 case 5 : 
-                     appraisalOutput.Category = " Single family House";
+                     appraisalOutput.category = " Single family House";
                      break;
                 case 6: 
-                     appraisalOutput.Category = " Condominium";
+                     appraisalOutput.category = " Condominium";
                      break;
                 default:
                      break;
             }
-          
 
-            appraisalOutput.AppraisalValue = CalculatePrice(priceInput);
+
+            appraisalOutput.appraisalValue = CalculatePrice(priceInput, category);
 
             return appraisalOutput;
 
         }
 
+        public AppraisalOutput processDetailInput(DetailInput detailInput)
+        {
+            PriceInput priceInput = MapDetailInputToPriceInput(detailInput);
+            AppraisalOutput appraisalOutput = new AppraisalOutput();
+            appraisalOutput.appraisalValue = CalculatePrice(priceInput, detailInput.catCode);
+            appraisalOutput.rating = detailInput.microRating;
+            appraisalOutput.zip = detailInput.zip;
+            appraisalOutput.town = detailInput.town;
+            appraisalOutput.street = detailInput.street;
+            appraisalOutput.CatCode = detailInput.catCode;
+            appraisalOutput.country = detailInput.country;
+
+            return appraisalOutput;
+        }
 
         #region Private 
+
+        private string getImageAndConvertbase64()
+        {
+            //string path = @"D:\Workspaces\AppServiceApi\AppServiceApi\Source\AppServiceApi\Resources\Images\Commercial1.jpg";
+            //string path = @"D:\Workspaces\AppServiceApi\AppServiceApi\Source\AppServiceApi\Resources\Images\Comercial 2.jpg";
+            //string path = @"D:\Workspaces\AppServiceApi\AppServiceApi\Source\AppServiceApi\Resources\Images\imagereader4.jpg";
+
+            string path = ConfigurationManager.AppSettings["Testimages"];
+            using (System.Drawing.Image image = System.Drawing.Image.FromFile(path))
+            {
+                using (MemoryStream m = new MemoryStream())
+                {
+                    image.Save(m, image.RawFormat);
+                    byte[] imageBytes = m.ToArray();
+
+                    // Convert byte[] to Base64 String
+                    string base64String = Convert.ToBase64String(imageBytes);
+                    return base64String;
+                }
+            }
+        }
+
+
+        private PriceInput MapDetailInputToPriceInput(DetailInput detailInput)
+        {
+            PriceInput priceInput = new PriceInput();              
+            priceInput.surfaceLiving =   detailInput.surfaceLiving  ;
+            priceInput.surfaceGround =   detailInput.landSurface;   
+            priceInput.roomNb        =   detailInput.roomNb;         
+            priceInput.bathNb        =   detailInput.bathNb;         
+            priceInput.buildYear     =   detailInput.buildYear ; 
+            priceInput.qualityMicro  =   detailInput.microRating; 
+            priceInput.zip           =   detailInput.zip;            
+            priceInput.town          =   detailInput.town;           
+            priceInput.street        =   detailInput.street;
+
+            return priceInput;
+        }
 
         private void getMicroRating(double cat, double lat, double lon)
         {
@@ -80,10 +148,9 @@ namespace AppServiceApi.Util.Helper
             reverseGeoCodeResult = reverseGeoCodeHelper.processReverseGeoCode(result);
         }
 
-        private long CalculatePrice(PriceInput priceInput) 
+        private long CalculatePrice(PriceInput priceInput , int cat) 
         {            
-            string catText = "a3";
-            int cat = 5;
+            string catText = "a3";            
             /// Call Price Service 
             switch (cat)
             {

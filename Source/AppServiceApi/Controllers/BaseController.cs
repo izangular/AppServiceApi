@@ -26,7 +26,8 @@ namespace AppServiceApi.Controllers
         protected string CustomerId = string.Empty;
         protected List<string> PermiCheckList = new List<string>();
 
-        protected BaseAuth baseAuth;
+        protected BaseAuth baseAuth = new BaseAuth();
+        protected string token = "";
 
         /// <summary>
         /// 
@@ -41,6 +42,8 @@ namespace AppServiceApi.Controllers
 
         protected bool IsAuthorised(out string errorMessage)
         {
+            token = Request.Headers.Authorization.ToString();
+
             var principal = Request.GetRequestContext().Principal as ClaimsPrincipal;
             if (principal == null)
             {
@@ -62,20 +65,23 @@ namespace AppServiceApi.Controllers
                 UserId = principal.Claims.First(c => c.Type.Contains("userId")).Value;
             if (principal.Claims.Any(c => c.Type == ("customerId")))
                 CustomerId = principal.Claims.First(c => c.Type.Contains("customerId")).Value;
+                     
 
             foreach (var l2 in permList)
             {
-                var auth = JsonConvert.DeserializeObject<BaseAuth>(l2.Value);
-                if (auth.Util != null)
+                dynamic auth = JsonConvert.DeserializeObject(l2.Value);
+                var appServiceAuth = ((JObject)auth)["appService"];     //TODO improve this by using classes , gave error while using class hence this alternate method , recheck.
+
+                if (appServiceAuth == null)
+                    appServiceAuth = ((JObject)auth)[""]["appService"];
+
+                if (appServiceAuth != null)
                 {
-                    baseAuth = auth;
-                    foreach (string per in PermiCheckList)
+                    bool result = appServiceAuth["modebase"].ToObject<bool>();
+                    if (result == false)
                     {
-                        if (!Convert.ToBoolean(JObject.Parse(l2.Value).SelectToken(per)))
-                        {
-                            errorMessage = ERR_MISSING_PERMISSION;
-                            return false;
-                        }
+                        errorMessage = ERR_MISSING_PERMISSION;
+                        return false;
                     }
                     errorMessage = string.Empty;
                     return true;
@@ -84,6 +90,7 @@ namespace AppServiceApi.Controllers
             errorMessage = ERR_MISSING_PERMISSION;
             return false;
         }
+
         protected IHttpActionResult ErrorAsync(Exception ex, string uri, object value = null)
         {
             var message = ex.Message;
@@ -109,8 +116,5 @@ namespace AppServiceApi.Controllers
             return InternalServerError(ex);
         }
     }
-    public static class Permission
-    {
-        public static string bionic { get { return "util.bionic"; } }
-    }
+   
 }

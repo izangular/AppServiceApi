@@ -11,30 +11,29 @@ using System.Web.Http;
 
 namespace AppServiceApi.Controllers
 {
-    public class ImageController : ApiController
+    public class ImageController : BaseController
     {
-        APIManager apiManager = new APIManager();
+        APIManager apiManager;
+        string errorMessage;
 
-        // GET: api/Image
-        [Route("api/Image")]
-        public IEnumerable<string> Get()
-        {
-            return new string[] { "value1", "value2" };
-        }
+        // GET: api/Image        
+        public IEnumerable<string> GetVersion()
+        {              
+            return new string[] { "AppService 1.0.0.0" };
+        }       
 
-        // GET: api/Image/5
-        public string Get(int id)
-        {
-            return "value";
-        }
-
-        [HttpPost]  
+        
+        [HttpPost]        
         public HttpResponseMessage ImageProcessing([FromBody]AppServiceApi.Models.ApiInput apiInput)
         {
             try
             {
-                AppServiceApi.Models.AppraisalOutput appraisalOutput = apiManager.processImageLatLon(getImageAndConvertbase64(), apiInput.latitude, apiInput.longitude);
-               // AppServiceApi.Models.AppraisalOutput appraisalOutput = apiManager.processImageLatLon(apiInput.imageBase64, apiInput.latitude, apiInput.longitude);
+                if (!IsAuthorised(out errorMessage))
+                    return Request.CreateErrorResponse(HttpStatusCode.Unauthorized, errorMessage);
+
+               apiManager = new APIManager(token);               
+               AppServiceApi.Models.AppraisalOutput appraisalOutput = apiManager.processImageLatLon(apiInput.imageBase64, apiInput.latitude, apiInput.longitude);
+
                 return Request.CreateResponse(HttpStatusCode.OK, appraisalOutput);
             }
             catch (Exception ex)
@@ -45,43 +44,25 @@ namespace AppServiceApi.Controllers
         }
 
 
-        //[HttpPost]        
-        //public void Test()
-        //{
-        //    try
-        //    {
-        //        string result = apiInput.imageBase64;
-        //       // return Request.CreateResponse(HttpStatusCode.OK, result);
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //      //  return Request.CreateResponse(HttpStatusCode.BadRequest, " Error ");
-        //    }
-
-        //}
-
-
-        private string getImageAndConvertbase64()
+        [HttpPost]        
+        public HttpResponseMessage AppraiseProperty([FromBody]AppServiceApi.Models.DetailInput detailInput)
         {
-            //string path = @"D:\Workspaces\AppServiceApi\AppServiceApi\Source\AppServiceApi\Resources\Images\Commercial1.jpg";
-            //string path = @"D:\Workspaces\AppServiceApi\AppServiceApi\Source\AppServiceApi\Resources\Images\Comercial 2.jpg";
-            //string path = @"D:\Workspaces\AppServiceApi\AppServiceApi\Source\AppServiceApi\Resources\Images\imagereader4.jpg";
+            try
+            {
+                if (!IsAuthorised(out errorMessage))
+                    return Request.CreateErrorResponse(HttpStatusCode.Unauthorized, errorMessage);
 
+                apiManager = new APIManager(token); 
+                AppServiceApi.Models.AppraisalOutput appraisalOutput = apiManager.processDetailInput(detailInput);
+                return Request.CreateResponse(HttpStatusCode.OK, appraisalOutput);
+            }
+            catch (Exception ex)
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest, " Error ");
+            }
 
-            string path = ConfigurationManager.AppSettings["Testimages"];
-            using (Image image = Image.FromFile(path))
-                {
-                    using (MemoryStream m = new MemoryStream())
-                    {
-                        image.Save(m, image.RawFormat);
-                        byte[] imageBytes = m.ToArray();
-
-                        // Convert byte[] to Base64 String
-                        string base64String = Convert.ToBase64String(imageBytes);
-                        return base64String;
-                    }
-                }
         }
+        
 
     }
 }

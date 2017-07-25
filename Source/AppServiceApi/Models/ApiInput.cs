@@ -12,4 +12,25 @@ namespace AppServiceApi.Models
         public double longitude { get; set; }
 
     }
+
+    public class DetailInput
+    {       
+        public int    surfaceLiving     { get; set; }
+        public int    landSurface       { get; set; }
+        public double roomNb            { get; set; }
+        public int    bathNb            { get; set; }
+        public int    buildYear         { get; set; }
+        public double microRating       { get; set; }
+        public int    catCode           { get; set; }
+        public string zip               { get; set; }
+        public string town              { get; set; }
+        public string street            { get; set; }
+        public string country           { get; set; }  
+
+    }
+
+
+
+
+
 }

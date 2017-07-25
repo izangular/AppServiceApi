@@ -10,7 +10,8 @@ namespace AppServiceApi.Util.Helper
 {
     public class GoogleVisionApi
     {
-        const string apiKey = "AIzaSyDySexF3apM0gm6jCkcEb_fTIWINIryKkU";
+        //const string apiKey = "AIzaSyDySexF3apM0gm6jCkcEb_fTIWINIryKkU";
+        string apiKey = ConfigurationManager.AppSettings["GoogleVisionApiKey"];
         IAZIClientSync IAZIClientSync;
         GoogleVisionApiInput googleVisionApiInput;
 
