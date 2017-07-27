@@ -30,7 +30,7 @@ namespace AppServiceApi.Util.Helper
             iaziClientsync = new IAZIClientSync();
         }
 
-        public AppraisalOutput processImageLatLon(string imageBase64 , double latitude , double longitude)
+        public AppraisalOutput processImageLatLon(string imageBase64 , double? latitude , double? longitude)
         {
             AppraisalOutput appraisalOutput = new AppraisalOutput();
             GoogleVisionApi googleVisionApi = new GoogleVisionApi();
@@ -47,8 +47,8 @@ namespace AppServiceApi.Util.Helper
                 category = googleVisionApi.fetchCategoryForImage(imageBase64);
             }
 
-            getMicroRating(category, latitude, longitude);
-            getAddressForLatLong(latitude, longitude);
+            getMicroRating(category, latitude??0.0 , longitude??0.0);
+            getAddressForLatLong(latitude??0.0, longitude??0.0);
 
             priceInput.qualityMicro = appraisalOutput.rating = ratingResponse.results.microRatingClass1To5 ?? 3;
             priceInput.zip = appraisalOutput.zip = reverseGeoCodeResult.Zip;
@@ -70,7 +70,7 @@ namespace AppServiceApi.Util.Helper
             }
 
 
-            appraisalOutput.appraisalValue = CalculatePrice(priceInput, category);
+            //appraisalOutput.appraisalValue = CalculatePrice(priceInput, category);
 
             return appraisalOutput;
 
@@ -80,12 +80,12 @@ namespace AppServiceApi.Util.Helper
         {
             PriceInput priceInput = MapDetailInputToPriceInput(detailInput);
             AppraisalOutput appraisalOutput = new AppraisalOutput();
-            appraisalOutput.appraisalValue = CalculatePrice(priceInput, detailInput.catCode);
-            appraisalOutput.rating = detailInput.microRating;
+            appraisalOutput.appraisalValue = CalculatePrice(priceInput, detailInput.catCode??0);
+            appraisalOutput.rating = detailInput.microRating??0;
             appraisalOutput.zip = detailInput.zip;
             appraisalOutput.town = detailInput.town;
             appraisalOutput.street = detailInput.street;
-            appraisalOutput.CatCode = detailInput.catCode;
+            appraisalOutput.CatCode = detailInput.catCode??0;
             appraisalOutput.country = detailInput.country;
 
             return appraisalOutput;
@@ -118,12 +118,12 @@ namespace AppServiceApi.Util.Helper
         private PriceInput MapDetailInputToPriceInput(DetailInput detailInput)
         {
             PriceInput priceInput = new PriceInput();              
-            priceInput.surfaceLiving =   detailInput.surfaceLiving  ;
+            priceInput.surfaceLiving =   detailInput.surfaceLiving??0  ;
             priceInput.surfaceGround =   detailInput.landSurface;   
-            priceInput.roomNb        =   detailInput.roomNb;         
-            priceInput.bathNb        =   detailInput.bathNb;         
-            priceInput.buildYear     =   detailInput.buildYear ; 
-            priceInput.qualityMicro  =   detailInput.microRating; 
+            priceInput.roomNb        =   detailInput.roomNb??0;         
+            priceInput.bathNb        =   detailInput.bathNb??0;         
+            priceInput.buildYear     =   detailInput.buildYear??0 ; 
+            priceInput.qualityMicro  =   detailInput.microRating??0; 
             priceInput.zip           =   detailInput.zip;            
             priceInput.town          =   detailInput.town;           
             priceInput.street        =   detailInput.street;

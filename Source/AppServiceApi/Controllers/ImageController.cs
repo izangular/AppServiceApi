@@ -8,6 +8,12 @@ using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Web.Http;
+using Swashbuckle.Swagger.Annotations;
+using log4net.Repository.Hierarchy;
+using log4net;
+using AppServiceApi.Util.Log;
+using System.Diagnostics;
+using AppServiceApi.Models;
 
 namespace AppServiceApi.Controllers
 {
@@ -17,40 +23,49 @@ namespace AppServiceApi.Controllers
         string errorMessage;
 
         // GET: api/Image        
-        public IEnumerable<string> GetVersion()
-        {              
-            return new string[] { "AppService 1.0.0.0" };
+        public HttpResponseMessage GetVersion()
+        {
+            return Request.CreateResponse(HttpStatusCode.OK, new { message = "AppService 1.0.0.0" });            
         }       
 
         
         [HttpPost]        
-        public HttpResponseMessage ImageProcessing([FromBody]AppServiceApi.Models.ApiInput apiInput)
+        public HttpResponseMessage ImageProcessing([FromBody]ApiInput apiInput)
         {
             try
-            {
+            {               
+                
                 if (!IsAuthorised(out errorMessage))
                     return Request.CreateErrorResponse(HttpStatusCode.Unauthorized, errorMessage);
 
-               apiManager = new APIManager(token);               
-               AppServiceApi.Models.AppraisalOutput appraisalOutput = apiManager.processImageLatLon(apiInput.imageBase64, apiInput.latitude, apiInput.longitude);
+                if (!ModelState.IsValid)
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, ModelState);                
+
+                apiManager = new APIManager(token);
+                AppServiceApi.Models.AppraisalOutput appraisalOutput = apiManager.processImageLatLon(apiInput.imageBase64, apiInput.latitude, apiInput.longitude);
 
                 return Request.CreateResponse(HttpStatusCode.OK, appraisalOutput);
             }
             catch (Exception ex)
             {
-                return Request.CreateResponse(HttpStatusCode.BadRequest, " Error ");
-            }
+                ErrorAsync(ex, Request.RequestUri.AbsoluteUri.ToString());
+                return Request.CreateResponse(HttpStatusCode.BadRequest, new { message = "Bad Request" });
+            } 
 
         }
 
 
-        [HttpPost]        
-        public HttpResponseMessage AppraiseProperty([FromBody]AppServiceApi.Models.DetailInput detailInput)
+        [HttpPost] 
+       
+        public HttpResponseMessage AppraiseProperty([FromBody]DetailInput detailInput)
         {
             try
             {
                 if (!IsAuthorised(out errorMessage))
                     return Request.CreateErrorResponse(HttpStatusCode.Unauthorized, errorMessage);
+
+                if (!ModelState.IsValid)
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, ModelState);
 
                 apiManager = new APIManager(token); 
                 AppServiceApi.Models.AppraisalOutput appraisalOutput = apiManager.processDetailInput(detailInput);
@@ -58,7 +73,8 @@ namespace AppServiceApi.Controllers
             }
             catch (Exception ex)
             {
-                return Request.CreateResponse(HttpStatusCode.BadRequest, " Error ");
+                ErrorAsync(ex, Request.RequestUri.AbsoluteUri.ToString());
+                return Request.CreateResponse(HttpStatusCode.BadRequest, new { message = "Bad Request" });
             }
 
         }

@@ -7,6 +7,11 @@ using Swashbuckle.Swagger;
 using System;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
+using System.Collections.Generic;
+using System.Web.Http.Description;
+using System.Web.Http.Controllers;
+using System.Reflection;
+using System.Linq;
 
 [assembly: PreApplicationStartMethod(typeof(SwaggerConfig), "Register")]
 
@@ -37,7 +42,7 @@ namespace AppServiceApi
                         // hold additional metadata for an API. Version and title are required but you can also provide
                         // additional fields by chaining methods off SingleApiVersion.
                         //
-                        c.SingleApiVersion("v1", "Service.Utilities API V1");
+                        c.SingleApiVersion("v1", "AppService API V1");
                         //c.DescribeAllEnumsAsStrings();
                         // If your API has multiple versions, use "MultipleApiVersions" instead of "SingleApiVersion".
                         // In this case, you must provide a lambda that tells Swashbuckle which actions should be
@@ -153,7 +158,7 @@ namespace AppServiceApi
                         // Operation filters.
                         //
                         // c.OperationFilter<AddDefaultResponse>();
-                        // c.OperationFilter<AddDefaultValues>();
+                         c.OperationFilter<AddDefaultValues>();
 
                         // If you've defined an OAuth2 flow as described above, you could use a custom filter
                         // to inspect some attribute on each action and infer which (if any) OAuth2 scopes are required
@@ -294,17 +299,7 @@ namespace AppServiceApi
             if (type.IsArray && type.GetElementType() != typeof(byte)) return; // Special case
 
             var nullableUnderlyingType = Nullable.GetUnderlyingType(type);
-
-            // Configure the following to display the default inputs parameters from json file in swagger
-            //switch (type.Name)
-            //{
-            //    case input class name eg: "BuildQualityWizardInputA1":
-            //        schema.example = (DefaultParameters.GetDefaultParam(type.Name)).ToCamelCaseObject(); ;
-            //        break;
-            //    case "BuildConditionWizardInputA1":
-            //        schema.example = (DefaultParameters.GetDefaultParam(type.Name)).ToCamelCaseObject(); ;
-            //        break;
-            //}
+            
             schema.vendorExtensions.Add("x-type-dotnet", (nullableUnderlyingType ?? type).FullName);
             schema.vendorExtensions.Add("x-nullable", nullableUnderlyingType != null || !type.IsValueType);
         }
@@ -319,5 +314,91 @@ namespace AppServiceApi
         }
     }
     /**** END :: SWAGGER DEFAULT VALUES ****/
+
+    public class SwaggerDefaultValue : Attribute
+    {
+        public string Name { get; set; }
+        public string Value { get; set; }
+
+        public SwaggerDefaultValue(string value)
+        {
+            this.Value = value;
+        }
+
+        public SwaggerDefaultValue(string name, string value)
+            : this(value)
+        {
+            this.Name = name;
+        }
+    }
+
+    public class AddDefaultValues : IOperationFilter
+    {
+        public void Apply(Operation operation, SchemaRegistry schemaRegistry, ApiDescription apiDescription)
+        {
+            if (operation.parameters == null)
+                return;
+            IDictionary<string, object> parameterValuePairs =
+            GetParameterValuePairs(apiDescription.ActionDescriptor);
+
+            foreach (var param in operation.parameters)
+            {
+                if (param.schema != null && param.schema.@ref != null)
+                {
+                    string schemaName = param.schema.@ref.Split('/').LastOrDefault();
+                    if (schemaRegistry.Definitions.ContainsKey(schemaName))
+                        foreach (var props in schemaRegistry.Definitions[schemaName].properties)
+                        {
+                            if (parameterValuePairs.ContainsKey(props.Key))
+                                props.Value.@default = parameterValuePairs[props.Key];
+                        }
+                }
+                var parameterValuePair = parameterValuePairs.FirstOrDefault(p => p.Key.IndexOf(param.name, StringComparison.InvariantCultureIgnoreCase) >= 0);
+                param.@default = parameterValuePair.Value;
+            }
+        }
+
+        private IDictionary<string, object> GetParameterValuePairs(HttpActionDescriptor actionDescriptor)
+        {
+            IDictionary<string, object> parameterValuePairs = new Dictionary<string, object>();
+
+            foreach (SwaggerDefaultValue defaultValue in actionDescriptor.GetCustomAttributes<SwaggerDefaultValue>())
+            {
+                parameterValuePairs.Add(defaultValue.Name, defaultValue.Value);
+            }
+
+            foreach (var parameter in actionDescriptor.GetParameters())
+            {
+                if (!parameter.ParameterType.IsPrimitive)
+                {
+                    foreach (PropertyInfo property in parameter.ParameterType.GetProperties())
+                    {
+                        var defaultValue = GetDefaultValue(property);
+
+                        if (defaultValue != null)
+                        {
+                            parameterValuePairs.Add(property.Name, defaultValue);
+                        }
+                    }
+                }
+            }
+
+            return parameterValuePairs;
+        }
+
+        private static object GetDefaultValue(PropertyInfo property)
+        {
+            var customAttribute = property.GetCustomAttributes<SwaggerDefaultValue>().FirstOrDefault();
+
+            if (customAttribute != null)
+            {
+                return customAttribute.Value;
+            }
+
+            return null;
+        }
+
+
+    }
 
 }

@@ -177,6 +177,7 @@
     <Compile Include="Util\Helper\ReverseGeoCodeHelper.cs" />
     <Compile Include="Util\Log\Log4NetExceptionLogger.cs" />
     <Compile Include="Util\Misc\ExceptionHelper.cs" />
+    <Compile Include="Util\Validation\Validation.cs" />
   </ItemGroup>
   <ItemGroup>
     <Content Include="packages.config">
@@ -207,7 +208,7 @@
     <VisualStudio>
       <FlavorProperties GUID="{349c5851-65df-11da-9384-00065b846f21}">
         <WebProjectProperties>
-          <UseIIS>True</UseIIS>
+          <UseIIS>False</UseIIS>
           <AutoAssignPort>True</AutoAssignPort>
           <DevelopmentServerPort>60322</DevelopmentServerPort>
           <DevelopmentServerVPath>/</DevelopmentServerVPath>

@@ -113,7 +113,7 @@ namespace AppServiceApi.Controllers
             if (ex.StackTrace != null) messagestr += ex.StackTrace;
 
             Trace.TraceError(messagestr);
-            return InternalServerError(ex);
+            return InternalServerError();
         }
     }
    

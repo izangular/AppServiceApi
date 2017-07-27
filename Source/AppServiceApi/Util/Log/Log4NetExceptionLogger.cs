@@ -45,7 +45,7 @@ namespace AppServiceApi.Util.Log
                 message.AppendLine(Context.Exception.Source).AppendLine();
               
             }
-            if (Context.Exception.InnerException.ToString() != null)
+            if (Context.Exception.InnerException != null)
             {
                 message.Append("Inner Exception").AppendLine();
                 message.Append("--------------------").AppendLine();
