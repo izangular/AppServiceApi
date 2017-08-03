@@ -22,14 +22,16 @@ namespace AppServiceApi.Controllers
         APIManager apiManager;
         string errorMessage;
 
-        // GET: api/Image        
+        // GET: api/Image 
+        [Route("GetVersion")]
         public HttpResponseMessage GetVersion()
         {
             return Request.CreateResponse(HttpStatusCode.OK, new { message = "AppService 1.0.0.0" });            
         }       
 
         
-        [HttpPost]        
+        [HttpPost]
+        [Route("ImageProcessing")]
         public HttpResponseMessage ImageProcessing([FromBody]ApiInput apiInput)
         {
             try
@@ -55,8 +57,8 @@ namespace AppServiceApi.Controllers
         }
 
 
-        [HttpPost] 
-       
+        [HttpPost]
+        [Route("AppraiseProperty")]
         public HttpResponseMessage AppraiseProperty([FromBody]DetailInput detailInput)
         {
             try

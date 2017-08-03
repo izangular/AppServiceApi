@@ -59,10 +59,12 @@ namespace AppServiceApi.Util.Helper
             
             switch(category)
             {
-                case 5 : 
+                case 5 :
+                     priceInput.surfaceLiving = Convert.ToInt16(ConfigurationManager.AppSettings["A2SurfaceLivingDefault"]) ;  //set default for A2 for Surface 
                      appraisalOutput.category = " Single family House";
                      break;
-                case 6: 
+                case 6:
+                     priceInput.surfaceLiving = Convert.ToInt16(ConfigurationManager.AppSettings["A3SurfaceLivingDefault"]) ;;
                      appraisalOutput.category = " Condominium";
                      break;
                 default:
@@ -70,7 +72,7 @@ namespace AppServiceApi.Util.Helper
             }
 
 
-            //appraisalOutput.appraisalValue = CalculatePrice(priceInput, category);
+            CalculatePrice(priceInput, category, appraisalOutput);
 
             return appraisalOutput;
 
@@ -80,7 +82,7 @@ namespace AppServiceApi.Util.Helper
         {
             PriceInput priceInput = MapDetailInputToPriceInput(detailInput);
             AppraisalOutput appraisalOutput = new AppraisalOutput();
-            appraisalOutput.appraisalValue = CalculatePrice(priceInput, detailInput.catCode??0);
+            CalculatePrice(priceInput, detailInput.catCode??0 , appraisalOutput);
             appraisalOutput.rating = detailInput.microRating??0;
             appraisalOutput.zip = detailInput.zip;
             appraisalOutput.town = detailInput.town;
@@ -109,6 +111,7 @@ namespace AppServiceApi.Util.Helper
 
                     // Convert byte[] to Base64 String
                     string base64String = Convert.ToBase64String(imageBytes);
+                   // System.IO.File.WriteAllText(@"D:\Workspaces\AppServiceApi\ImageBase64Sample.txt", base64String);
                     return base64String;
                 }
             }
@@ -148,7 +151,7 @@ namespace AppServiceApi.Util.Helper
             reverseGeoCodeResult = reverseGeoCodeHelper.processReverseGeoCode(result);
         }
 
-        private long CalculatePrice(PriceInput priceInput , int cat) 
+        private void CalculatePrice(PriceInput priceInput, int cat, AppraisalOutput appraisalOutput) 
         {            
             string catText = "a3";            
             /// Call Price Service 
@@ -174,12 +177,50 @@ namespace AppServiceApi.Util.Helper
             string priceUrl = String.Format("{0}/{1}/{2}",ConfigurationManager.AppSettings["Server"], ConfigurationManager.AppSettings["PriceService"], catText);
             string postData = "[" + JsonConvert.SerializeObject(priceInput) + "]";  
             string result = iaziClientsync.postApiRequest(priceUrl, postData,token);
-            dynamic jsonPriceResult = Newtonsoft.Json.JsonConvert.DeserializeObject(result);
+
+            //PriceOutput priceOutput = Newtonsoft.Json.JsonConvert.DeserializeObject<PriceOutput>(result);
+            parsePriceModelRJson(result, appraisalOutput);
+
+        }
+
+        private void parsePriceModelRJson(string resultJson , AppraisalOutput appraisalOutput)
+        {
+
+            dynamic jsonPriceResult = Newtonsoft.Json.JsonConvert.DeserializeObject(resultJson);
 
             if (jsonPriceResult.status.Value == "OK" && jsonPriceResult.data[0].result.status.Value == 0)
-                return jsonPriceResult.data[0].result.value.Value;
-            else
-                return 0;
+            {
+                appraisalOutput.appraisalValue = jsonPriceResult.data[0].result.value.Value;
+
+
+                for (int i = 0; i < jsonPriceResult.data[0].parameterInfo.Count; i++)
+                {
+                    dynamic component = jsonPriceResult.data[0].parameterInfo[i];
+                    string compName = component.name;
+                    // check if this entry in address_components has a type of country
+                    switch (compName)
+                    {
+                        case "roomNb":
+                            appraisalOutput.roomNb = (component.value > 0) ? component.value : component.replacedValue;
+                            break;
+                        case "surfaceLiving":
+                            appraisalOutput.surfaceLiving = (component.value > 0) ? component.value : component.replacedValue;
+                            break;
+                        case "landSurface":
+                            appraisalOutput.landSurface = (component.value > 0) ? component.value : component.replacedValue;
+                            break;
+                        case "bathNb":
+                            appraisalOutput.bathNb = (component.value > 0) ? component.value : component.replacedValue;
+                            break;
+                        case "buildYear":
+                            appraisalOutput.buildYear = (component.value > 0) ? component.value : component.replacedValue;
+                            break;
+                        default:
+                            break;
+                    }
+
+                }
+            }
 
         }
 

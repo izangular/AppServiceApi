@@ -14,39 +14,39 @@ namespace AppServiceApi.Models
         public string imageBase64 { get; set; }
 
         [Required]
-        [SwaggerDefaultValue("47.89012")]        
+        [SwaggerDefaultValue("47.408879")]        
         public double? latitude { get; set; }
 
         [Required]
-        [SwaggerDefaultValue("8.345123")]        
+        [SwaggerDefaultValue("8.547611")]        
         public double? longitude { get; set; }
 
     }
 
     public class DetailInput
     {
-        [Required]
-        [Range(1, 300)]
+        //[Required]
+        //[Range(1, 300)]
         [SwaggerDefaultValue("250")]         
         public int?    surfaceLiving     { get; set; }
               
-        [Range(1, 1500)]
+        //[Range(1, 1500)]
         [SwaggerDefaultValue("1000")]  
-        [RequireWhenCategoryAttribute]
+        //[RequireWhenCategoryAttribute]
         public int?    landSurface       { get; set; }
 
-        [Required]
-        [Range(1, 10)]
+        //[Required]
+        //[Range(1, 10)]
         [SwaggerDefaultValue("3.5")]  
         public double? roomNb            { get; set; }
 
-        [Required]
-        [Range(1, 5)]
+        //[Required]
+        //[Range(1, 5)]
         [SwaggerDefaultValue("1")]  
         public int?    bathNb            { get; set; }
 
-        [Required]       
-        [CustomDateRangeAttribute]
+        //[Required]       
+        //[CustomDateRangeAttribute]
         [SwaggerDefaultValue("1990")]  
         public int?    buildYear         { get; set; }
 
