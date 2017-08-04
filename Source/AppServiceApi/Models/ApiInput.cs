@@ -14,11 +14,11 @@ namespace AppServiceApi.Models
         public string imageBase64 { get; set; }
 
         [Required]
-        [SwaggerDefaultValue("47.408879")]        
+        [SwaggerDefaultValue("47.4091209")]        
         public double? latitude { get; set; }
 
         [Required]
-        [SwaggerDefaultValue("8.547611")]        
+        [SwaggerDefaultValue("8.5467016")]        
         public double? longitude { get; set; }
 
     }

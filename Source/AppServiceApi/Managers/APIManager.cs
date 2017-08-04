@@ -50,7 +50,7 @@ namespace AppServiceApi.Util.Helper
             getMicroRating(category, latitude??0.0 , longitude??0.0);
             getAddressForLatLong(latitude??0.0, longitude??0.0);
 
-            priceInput.qualityMicro = appraisalOutput.rating = ratingResponse.results.microRatingClass1To5 ?? 3;
+            priceInput.qualityMicro = appraisalOutput.microRating = ratingResponse.results.microRatingClass1To5 ?? 3;
             priceInput.zip = appraisalOutput.zip = reverseGeoCodeResult.Zip;
             priceInput.town = appraisalOutput.town = reverseGeoCodeResult.Town;
             priceInput.street = appraisalOutput.street = reverseGeoCodeResult.Street;
@@ -83,7 +83,7 @@ namespace AppServiceApi.Util.Helper
             PriceInput priceInput = MapDetailInputToPriceInput(detailInput);
             AppraisalOutput appraisalOutput = new AppraisalOutput();
             CalculatePrice(priceInput, detailInput.catCode??0 , appraisalOutput);
-            appraisalOutput.rating = detailInput.microRating??0;
+            appraisalOutput.microRating = detailInput.microRating??0;
             appraisalOutput.zip = detailInput.zip;
             appraisalOutput.town = detailInput.town;
             appraisalOutput.street = detailInput.street;
@@ -206,7 +206,7 @@ namespace AppServiceApi.Util.Helper
                         case "surfaceLiving":
                             appraisalOutput.surfaceLiving = (component.value > 0) ? component.value : component.replacedValue;
                             break;
-                        case "landSurface":
+                        case "surfaceGround":
                             appraisalOutput.landSurface = (component.value > 0) ? component.value : component.replacedValue;
                             break;
                         case "bathNb":

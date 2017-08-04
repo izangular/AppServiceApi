@@ -13,7 +13,7 @@ namespace AppServiceApi.Models
        public string country         { get; set; }
        public string category        { get; set; }       
        public long   appraisalValue  { get; set; }
-       public double rating          { get; set; }
+       public double microRating          { get; set; }
 
        public int?  surfaceLiving    { get; set; }
        public int?  landSurface      { get; set; }
