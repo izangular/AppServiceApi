@@ -21,6 +21,10 @@ namespace AppServiceApi.Models
         [SwaggerDefaultValue("8.5467016")]        
         public double? longitude { get; set; }
 
+        [Required]
+        [SwaggerDefaultValue("123XD&E")]
+        public string deviceId { get; set; }
+
     }
 
     public class DetailInput
@@ -73,7 +77,11 @@ namespace AppServiceApi.Models
 
         [Required]
         [SwaggerDefaultValue("Switzerland")]
-        public string country           { get; set; }  
+        public string country           { get; set; }
+
+        [Required]
+        [SwaggerDefaultValue("123XD&E")]
+        public string deviceId { get; set; }
 
     }
 

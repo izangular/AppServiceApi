@@ -31,6 +31,23 @@ namespace AppServiceApi.Controllers
 
         
         [HttpPost]
+        [Route("v1/register")]
+        public HttpResponseMessage Register([FromBody]Register register)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, ModelState);
+       
+                return Request.CreateResponse(HttpStatusCode.OK,"Success");
+            }
+            catch (Exception e)
+            {
+                return Request.CreateResponse(HttpStatusCode.BadRequest,"Fail");
+            }
+        }
+
+        [HttpPost]
         [Route("v1/defaultAppraisal")]
         public HttpResponseMessage ImageProcessing([FromBody]ApiInput apiInput)
         {
@@ -56,7 +73,6 @@ namespace AppServiceApi.Controllers
 
         }
 
-
         [HttpPost]
         [Route("v1/appraise")]
         public HttpResponseMessage AppraiseProperty([FromBody]DetailInput detailInput)
@@ -80,7 +96,94 @@ namespace AppServiceApi.Controllers
             }
 
         }
-        
+
+        [HttpPost]
+        [Route("v1/defaultOfferedRentAppraisal")]
+        public HttpResponseMessage ImageProcessingForRent([FromBody]OfferedRentApiInput apiInput)
+        {
+            try
+            {
+                //if (!IsAuthorised(out errorMessage))
+                //    return Request.CreateErrorResponse(HttpStatusCode.Unauthorized, errorMessage);
+
+                if (!ModelState.IsValid)
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, ModelState);
+
+                apiManager = new APIManager(token);
+                AppServiceApi.Models.OfferedRentOutput offeredRentOutput = apiManager.processImageLatLonForOfferedRent(apiInput.imageBase64, apiInput.lat, apiInput.lng);
+
+                return Request.CreateResponse(HttpStatusCode.OK, offeredRentOutput);
+            }
+
+            catch (Exception ex)
+            {
+                ErrorAsync(ex, Request.RequestUri.AbsoluteUri.ToString());
+                return Request.CreateResponse(HttpStatusCode.BadRequest, new { message = "Bad Request" });
+            }
+        }
+
+        [HttpPost]
+        [Route("v1/OfferedRentAppraisal")]
+        public HttpResponseMessage OfferedRentAppraiseProperty([FromBody]OfferedRentInput offeredRentInput)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, ModelState);
+
+                apiManager = new APIManager(token);
+                AppServiceApi.Models.OfferedRentOutput offeredRentOutput = apiManager.processOfferedRentInput(offeredRentInput);
+
+                return Request.CreateResponse(HttpStatusCode.OK, offeredRentOutput);
+            }
+            catch (Exception ex)
+            {
+                ErrorAsync(ex, Request.RequestUri.AbsoluteUri.ToString());
+                return Request.CreateResponse(HttpStatusCode.BadRequest, new { message = "Bad Request" });
+            }
+        }
+
+        [HttpPost]
+        [Route("v1/nearestNeighbour/rentFinancials")]
+        public HttpResponseMessage NearestNeighbourRentFinancials([FromBody]RentFinancials rentFinancial)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, ModelState);
+
+                apiManager = new APIManager(token);
+                object result = apiManager.calculateRentFinancial(rentFinancial);
+
+                return Request.CreateResponse(HttpStatusCode.OK, result);
+            }
+            catch (Exception ex)
+            {
+                ErrorAsync(ex, Request.RequestUri.AbsoluteUri.ToString());
+                return Request.CreateResponse(HttpStatusCode.BadRequest, new { message = "Bad Request" });
+            }
+        }
+
+        [HttpPost]
+        [Route("v1/nearestNeighbour/rentContracts")]
+        public HttpResponseMessage NearestNeighbourRentContracts([FromBody]RentContracts rentContracts)
+        {
+            try
+            {
+                if (!ModelState.IsValid)
+                    return Request.CreateResponse(HttpStatusCode.BadRequest, ModelState);
+
+                apiManager = new APIManager(token);
+                object result = apiManager.calculateRentContracts(rentContracts);
+
+                return Request.CreateResponse(HttpStatusCode.OK, result);
+            }
+            catch (Exception ex)
+            {
+                ErrorAsync(ex, Request.RequestUri.AbsoluteUri.ToString());
+                return Request.CreateResponse(HttpStatusCode.BadRequest, new { message = "Bad Request" });
+            }
+        }
 
     }
 }

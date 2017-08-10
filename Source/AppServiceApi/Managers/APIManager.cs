@@ -78,6 +78,64 @@ namespace AppServiceApi.Util.Helper
 
         }
 
+        public OfferedRentOutput processImageLatLonForOfferedRent(string imageBase64 , double? latitude , double? longitude)
+        {
+            OfferedRentOutput offeredRentOutput = new OfferedRentOutput();
+            GoogleVisionApi googleVisionApi = new GoogleVisionApi();
+            OfferedRentInput offeredRentInput = new OfferedRentInput();
+            int category;
+
+            try
+            {
+                category = googleVisionApi.fetchCategoryForImage(imageBase64);
+            }
+            catch (Exception)
+            {
+                imageBase64 = getImageAndConvertbase64();
+                category = googleVisionApi.fetchCategoryForImage(imageBase64);
+            }
+
+            getMicroRating(category, latitude ?? 0.0, longitude ?? 0.0);
+            getAddressForLatLong(latitude ?? 0.0, longitude ?? 0.0);
+            offeredRentInput.ortId = getOrtId(reverseGeoCodeResult.Country, latitude ?? 0.0, longitude ?? 0.0, "en-US");
+
+            offeredRentInput.qualityMicro = offeredRentOutput.qualityMicro = ratingResponse.results.microRatingClass1To5 ?? 3;
+            offeredRentInput.address = new OfferedRentAddress()
+            {
+                address = reverseGeoCodeResult.FormattedAddress,
+                zip = offeredRentOutput.zip = reverseGeoCodeResult.Zip,
+                town = offeredRentOutput.town = reverseGeoCodeResult.Town,
+                street = offeredRentOutput.street = reverseGeoCodeResult.Street,
+                lat = (double)latitude,
+                lng = (double)longitude
+            };
+
+            offeredRentOutput.country = reverseGeoCodeResult.Country;
+            offeredRentOutput.CategoryCode = category;
+
+            switch (category)
+            {
+                case 5:
+                    offeredRentInput.surfaceContract = Convert.ToInt16(ConfigurationManager.AppSettings["A2SurfaceLivingDefault"]);  //set default for A2 for Surface 
+                    offeredRentInput.categoryCode = offeredRentOutput.CategoryCode;
+                    offeredRentOutput.category = " Single family House";
+                    break;
+                case 6:
+                    offeredRentInput.surfaceContract = Convert.ToInt16(ConfigurationManager.AppSettings["A3SurfaceLivingDefault"]);
+                    offeredRentInput.categoryCode = offeredRentOutput.CategoryCode;
+                    offeredRentOutput.category = " Condominium";
+                    break;
+                default:
+                    break;
+            }
+
+
+            CalculateRent(offeredRentInput, offeredRentOutput);
+
+            return offeredRentOutput;
+        }
+
+
         public AppraisalOutput processDetailInput(DetailInput detailInput)
         {
             PriceInput priceInput = MapDetailInputToPriceInput(detailInput);
@@ -91,6 +149,42 @@ namespace AppServiceApi.Util.Helper
             appraisalOutput.country = detailInput.country;
 
             return appraisalOutput;
+        }
+
+        public OfferedRentOutput processOfferedRentInput(OfferedRentInput offeredRentInput)
+        {
+            OfferedRentOutput offeredRentOutput = new OfferedRentOutput();
+            CalculateRent(offeredRentInput, offeredRentOutput);
+            offeredRentOutput.qualityMicro = offeredRentInput.qualityMicro ?? 0;
+            offeredRentOutput.zip = offeredRentInput.address.zip;
+            offeredRentOutput.town = offeredRentInput.address.town;
+            offeredRentOutput.street = offeredRentInput.address.street;
+            offeredRentOutput.CategoryCode = offeredRentInput.categoryCode;
+            offeredRentOutput.country = offeredRentInput.address.country;
+
+            return offeredRentOutput;
+        }
+
+        public object calculateRentFinancial(RentFinancials rentFinancial)
+        {
+            string url = String.Format("{0}/{1}?culture={2}&filter={3}&latitude={4}&longitude={5}&nbComparableProperties={6}&year={7}", 
+                                        ConfigurationManager.AppSettings["Server"], ConfigurationManager.AppSettings["NearestNeighbourRentFinancial"],
+                                        rentFinancial.culture, rentFinancial.filter, rentFinancial.latitude, rentFinancial.longitude, 
+                                        rentFinancial.nbComparableProperties, rentFinancial.year);
+            string result = iaziClientsync.getApiResponse(url, token);
+
+            return JObject.Parse(result);
+        }
+
+        public object calculateRentContracts(RentContracts rentContracts)
+        {
+            string url = String.Format("{0}/{1}?culture={2}&filter={3}&latitude={4}&longitude={5}&nbComparableProperties={6}",
+                                        ConfigurationManager.AppSettings["Server"], ConfigurationManager.AppSettings["NearestNeighbourRentContract"],
+                                        rentContracts.culture, rentContracts.filter, rentContracts.latitude, rentContracts.longitude,
+                                        rentContracts.nbComparableProperties);
+            string result = iaziClientsync.getApiResponse(url, token);
+
+            return JObject.Parse(result);
         }
 
         #region Private 
@@ -141,6 +235,13 @@ namespace AppServiceApi.Util.Helper
             ratingResponse = JsonConvert.DeserializeObject<RatingResponse>(result);                        
         }
 
+        private int getOrtId(string country, double lat, double lon, string culture)
+        {
+            string url = String.Format("{0}/{1}?countryCode={2}&lat={3}&lon={4}&culture={5}", ConfigurationManager.AppSettings["Server"], ConfigurationManager.AppSettings["OfferedRentOrtIdService"], "CH" , lat, lon , culture);
+            string result = iaziClientsync.getApiResponse(url, token);
+            return Convert.ToInt32(result);
+        }
+
         private void getAddressForLatLong(double lat, double lon)
         {
             ReverseGeoCodeHelper reverseGeoCodeHelper = new ReverseGeoCodeHelper();
@@ -183,6 +284,15 @@ namespace AppServiceApi.Util.Helper
 
         }
 
+        private void CalculateRent(OfferedRentInput offeredRentInput, OfferedRentOutput offeredRentOutput)
+        {
+            string priceUrl = String.Format("{0}/{1}", ConfigurationManager.AppSettings["Server"], ConfigurationManager.AppSettings["OfferedRentService"]);
+            string postData = "[" + JsonConvert.SerializeObject(offeredRentInput) + "]";
+            string result = iaziClientsync.postApiRequest(priceUrl, postData, token);
+
+            parseOfferedRentModelRJson(result, offeredRentOutput);
+        }
+
         private void parsePriceModelRJson(string resultJson , AppraisalOutput appraisalOutput)
         {
 
@@ -222,6 +332,58 @@ namespace AppServiceApi.Util.Helper
                 }
             }
 
+        }
+
+        private void parseOfferedRentModelRJson(string resultJson, OfferedRentOutput offeredRentOutput)
+        {
+            dynamic jsonOfferedRentResult = Newtonsoft.Json.JsonConvert.DeserializeObject(resultJson);
+
+
+            if (jsonOfferedRentResult.status.Value == "OK" && jsonOfferedRentResult.data[0].result.status.Value == 0)
+            {
+                offeredRentOutput.appraisalValue = (long)jsonOfferedRentResult.data[0].result.value.Value;
+
+
+                for (int i = 0; i < jsonOfferedRentResult.data[0].parameterInfo.Count; i++)
+                {
+                    dynamic component = jsonOfferedRentResult.data[0].parameterInfo[i];
+                    string compName = component.name;
+                    // check if this entry in address_components has a type of country
+                    switch (compName)
+                    {
+                        case "ortId":
+                             offeredRentOutput.ortId = (component.value > 0) ? component.value : component.replacedValue;
+                            break;
+                        case "objectTypeCode":
+                            offeredRentOutput.ObjectTypeCode = (component.value > 0) ? component.value : component.replacedValue;
+                            break;
+                        case "roomNb":
+                            offeredRentOutput.roomNb = (component.value > 0) ? component.value : component.replacedValue;
+                            break;
+                        case "surfaceContract":
+                            offeredRentOutput.surfaceContract = (component.value > 0) ? component.value : component.replacedValue;
+                            break;
+                        //case "surfaceGround":
+                        //    offeredRentOutput.landSurface = (component.value > 0) ? component.value : component.replacedValue;
+                        //    break;
+                        //case "bathNb":
+                        //    offeredRentOutput.bathNb = (component.value > 0) ? component.value : component.replacedValue;
+                        //    break;
+                        case "buildYear":
+                            offeredRentOutput.buildYear = (component.value > 0) ? component.value : component.replacedValue;
+                            break;
+                        case "liftNb":
+                            offeredRentOutput.lift = (component.value > 0) ? component.value : (component.replacedValue == null) ? 0 : component.replacedValue;
+                            break;
+                        //case "categoryCode":
+                        //    offeredRentOutput.CategoryCode = (component.value > 0) ? component.value : (component.replacedValue == null) ? 0 : component.replacedValue;
+                        //    break;
+                        default:
+                            break;
+                    }
+
+                }
+            }
         }
 
         #endregion
