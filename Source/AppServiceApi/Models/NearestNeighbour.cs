@@ -27,7 +27,11 @@ namespace AppServiceApi.Models
         public string filter { get; set; }
 
         [SwaggerDefaultValue("5")]
-        public int nbComparableProperties { get; set; }       
+        public int nbComparableProperties { get; set; }
+
+        [Required]
+        [SwaggerDefaultValue("123XD&E")]
+        public string deviceId { get; set; }
     }
 
     public class RentContracts
@@ -48,5 +52,9 @@ namespace AppServiceApi.Models
 
         [SwaggerDefaultValue("5")]
         public int nbComparableProperties { get; set; }
+
+        [Required]
+        [SwaggerDefaultValue("123XD&E")]
+        public string deviceId { get; set; }
     }
 }

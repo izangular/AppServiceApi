@@ -36,6 +36,10 @@ namespace AppServiceApi.Util.Helper
             GoogleVisionApi googleVisionApi = new GoogleVisionApi();
             PriceInput priceInput = new PriceInput();
             int category;
+            string country;
+            string countryCode;
+            double? lat;
+            double? lng;
 
             try
             {
@@ -46,15 +50,43 @@ namespace AppServiceApi.Util.Helper
                 imageBase64 = getImageAndConvertbase64();
                 category = googleVisionApi.fetchCategoryForImage(imageBase64);
             }
-
-            getMicroRating(category, latitude??0.0 , longitude??0.0);
+           
             getAddressForLatLong(latitude??0.0, longitude??0.0);
 
+            if (reverseGeoCodeResult.Country != "Switzerland")
+            {
+                country = "Switzerland";
+                countryCode = "CH";
+
+                priceInput.zip = appraisalOutput.zip = ConfigurationManager.AppSettings["DefaultZip"];
+                priceInput.town = appraisalOutput.town = ConfigurationManager.AppSettings["DefaultTown"];
+                priceInput.street = appraisalOutput.street = ConfigurationManager.AppSettings["DefaultStreet"];
+                lat = Convert.ToDouble(ConfigurationManager.AppSettings["DefaultLatitude"]);
+                lng = Convert.ToDouble(ConfigurationManager.AppSettings["DefaultLongitude"]);
+            }
+            else
+            {
+                country = reverseGeoCodeResult.Country;
+                countryCode = "CH";
+
+                priceInput.zip = appraisalOutput.zip = reverseGeoCodeResult.Zip;
+                priceInput.town = appraisalOutput.town = reverseGeoCodeResult.Town;
+                priceInput.street = appraisalOutput.street = reverseGeoCodeResult.Street;
+                lat = (double)latitude;
+                lng = (double)longitude;             
+            }
+
+            //country = (reverseGeoCodeResult.Country != "Switzerland") ? "Switzerland" : reverseGeoCodeResult.Country;
+            //countryCode = (country != "Switzerland") ? "CH" : "CH";
+
+            getMicroRating(category, lat ?? 0.0, lng ?? 0.0,countryCode);
+
             priceInput.qualityMicro = appraisalOutput.microRating = ratingResponse.results.microRatingClass1To5 ?? 3;
-            priceInput.zip = appraisalOutput.zip = reverseGeoCodeResult.Zip;
-            priceInput.town = appraisalOutput.town = reverseGeoCodeResult.Town;
-            priceInput.street = appraisalOutput.street = reverseGeoCodeResult.Street;
-            appraisalOutput.country = reverseGeoCodeResult.Country;
+            //priceInput.zip = appraisalOutput.zip = reverseGeoCodeResult.Zip;
+            //priceInput.town = appraisalOutput.town = reverseGeoCodeResult.Town;
+            //priceInput.street = appraisalOutput.street = reverseGeoCodeResult.Street;
+            //appraisalOutput.country = reverseGeoCodeResult.Country;
+            appraisalOutput.country = country;
             appraisalOutput.CatCode = category;
             
             switch(category)
@@ -84,6 +116,8 @@ namespace AppServiceApi.Util.Helper
             GoogleVisionApi googleVisionApi = new GoogleVisionApi();
             OfferedRentInput offeredRentInput = new OfferedRentInput();
             int category;
+            string country;
+            string countryCode;
 
             try
             {
@@ -94,23 +128,48 @@ namespace AppServiceApi.Util.Helper
                 imageBase64 = getImageAndConvertbase64();
                 category = googleVisionApi.fetchCategoryForImage(imageBase64);
             }
-
-            getMicroRating(category, latitude ?? 0.0, longitude ?? 0.0);
+          
             getAddressForLatLong(latitude ?? 0.0, longitude ?? 0.0);
-            offeredRentInput.ortId = getOrtId(reverseGeoCodeResult.Country, latitude ?? 0.0, longitude ?? 0.0, "en-US");
-
-            offeredRentInput.qualityMicro = offeredRentOutput.qualityMicro = ratingResponse.results.microRatingClass1To5 ?? 3;
-            offeredRentInput.address = new OfferedRentAddress()
+           
+            if (reverseGeoCodeResult.Country != "Switzerland")
             {
-                address = reverseGeoCodeResult.FormattedAddress,
-                zip = offeredRentOutput.zip = reverseGeoCodeResult.Zip,
-                town = offeredRentOutput.town = reverseGeoCodeResult.Town,
-                street = offeredRentOutput.street = reverseGeoCodeResult.Street,
-                lat = (double)latitude,
-                lng = (double)longitude
-            };
+                country = "Switzerland";
+                countryCode = "CH";
 
-            offeredRentOutput.country = reverseGeoCodeResult.Country;
+                offeredRentInput.address = new OfferedRentAddress()
+                {
+                    address = ConfigurationManager.AppSettings["DefaultFormatedAddress"],
+                    zip = offeredRentOutput.zip = ConfigurationManager.AppSettings["DefaultZip"],
+                    town = offeredRentOutput.town = ConfigurationManager.AppSettings["DefaultTown"],
+                    street = offeredRentOutput.street = ConfigurationManager.AppSettings["DefaultStreet"],
+                    lat = Convert.ToDouble(ConfigurationManager.AppSettings["DefaultLatitude"]),
+                    lng = Convert.ToDouble(ConfigurationManager.AppSettings["DefaultLongitude"]),
+                    country = country
+                };
+            }
+            else
+            {
+                country = reverseGeoCodeResult.Country;
+                countryCode = "CH";
+
+                offeredRentInput.address = new OfferedRentAddress()
+                {
+                    address = reverseGeoCodeResult.FormattedAddress,
+                    zip = offeredRentOutput.zip = reverseGeoCodeResult.Zip,
+                    town = offeredRentOutput.town = reverseGeoCodeResult.Town,
+                    street = offeredRentOutput.street = reverseGeoCodeResult.Street,
+                    lat = (double)latitude,
+                    lng = (double)longitude,
+                    country = country
+                };
+            }
+
+            getMicroRating(category, offeredRentInput.address.lat ?? 0.0, offeredRentInput.address.lng ?? 0.0, countryCode);
+            offeredRentInput.qualityMicro = offeredRentOutput.qualityMicro = ratingResponse.results.microRatingClass1To5 ?? 3;
+
+            offeredRentInput.ortId = getOrtId(countryCode, offeredRentInput.address.lat ?? 0.0, offeredRentInput.address.lng ?? 0.0, "en-US");
+
+            offeredRentOutput.country = country;
             offeredRentOutput.CategoryCode = category;
 
             switch (category)
@@ -228,16 +287,16 @@ namespace AppServiceApi.Util.Helper
             return priceInput;
         }
 
-        private void getMicroRating(double cat, double lat, double lon)
+        private void getMicroRating(double cat, double lat, double lon, string country)
         {
-            string url = String.Format("{0}/{1}?cat={2}&countryCode={3}&lat={4}&lon={5}",ConfigurationManager.AppSettings["Server"], ConfigurationManager.AppSettings["MicroRating"], cat, "CH", lat, lon);
+            string url = String.Format("{0}/{1}?cat={2}&countryCode={3}&lat={4}&lon={5}", ConfigurationManager.AppSettings["Server"], ConfigurationManager.AppSettings["MicroRating"], cat, country, lat, lon);
             string result = iaziClientsync.getApiResponse(url,token);
             ratingResponse = JsonConvert.DeserializeObject<RatingResponse>(result);                        
         }
 
         private int getOrtId(string country, double lat, double lon, string culture)
         {
-            string url = String.Format("{0}/{1}?countryCode={2}&lat={3}&lon={4}&culture={5}", ConfigurationManager.AppSettings["Server"], ConfigurationManager.AppSettings["OfferedRentOrtIdService"], "CH" , lat, lon , culture);
+            string url = String.Format("{0}/{1}?countryCode={2}&lat={3}&lon={4}&culture={5}", ConfigurationManager.AppSettings["Server"], ConfigurationManager.AppSettings["OfferedRentOrtIdService"], country, lat, lon, culture);
             string result = iaziClientsync.getApiResponse(url, token);
             return Convert.ToInt32(result);
         }

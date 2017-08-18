@@ -116,11 +116,11 @@ namespace AppServiceApi.Models
 
         [Required]
         [SwaggerDefaultValue("47.409195")]
-        public double lat { get; set; }
+        public double? lat { get; set; }
 
         [Required]
         [SwaggerDefaultValue("8.547145")]
-        public double lng { get; set; }
+        public double? lng { get; set; }
     }
 
     public class OfferedRentOutput

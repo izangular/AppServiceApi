@@ -41,7 +41,7 @@ namespace AppServiceApi.Util.Helper
 
         public int fetchCategoryForImage(string imageBase64)
         {
-            int category = 0; // Default is a single family home 
+            int category = 6; // Default is a condominium
             GoogleVisionApiOutput  googleVisionApiOutput = AnalyseImage(imageBase64);
 
             if (googleVisionApiOutput.responses != null &&  googleVisionApiOutput.responses.Count > 0 && googleVisionApiOutput.responses[0].labelAnnotations.Count > 0)
@@ -60,7 +60,7 @@ namespace AppServiceApi.Util.Helper
                         case "cottage" :
                             category = 5; //single family
                             break;                        
-                        default:                            
+                        default:
                             break;
                     }
 
