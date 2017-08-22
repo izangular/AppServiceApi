@@ -361,6 +361,13 @@ namespace AppServiceApi.Util.Helper
             {
                 appraisalOutput.appraisalValue = jsonPriceResult.data[0].result.value.Value;
 
+                Random rnd = new Random();
+                double randomHi = rnd.Next(10, 15) / 100.0;
+                double randomLow = rnd.Next(15, 20) / 100.0;
+
+                appraisalOutput.minappraisalValue =Convert.ToInt64(appraisalOutput.appraisalValue - (appraisalOutput.appraisalValue * randomLow));
+                appraisalOutput.maxappraisalValue =Convert.ToInt64(appraisalOutput.appraisalValue + (appraisalOutput.appraisalValue * randomHi));
+
 
                 for (int i = 0; i < jsonPriceResult.data[0].parameterInfo.Count; i++)
                 {

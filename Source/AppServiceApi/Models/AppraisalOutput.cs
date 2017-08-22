@@ -7,19 +7,21 @@ namespace AppServiceApi.Models
 {
     public class AppraisalOutput
     { 
-       public string zip             { get; set; }
-       public string town            { get; set; }
-       public string street          { get; set; }
-       public string country         { get; set; }
-       public string category        { get; set; }       
-       public long   appraisalValue  { get; set; }
-       public double microRating          { get; set; }
+       public string zip                { get; set; }
+       public string town               { get; set; }
+       public string street             { get; set; }
+       public string country            { get; set; }
+       public string category           { get; set; }       
+       public long   appraisalValue     { get; set; }
+       public long   minappraisalValue  { get; set; }
+       public long   maxappraisalValue  { get; set; }
+       public double microRating        { get; set; }
 
-       public int?  surfaceLiving    { get; set; }
-       public int?  landSurface      { get; set; }
-       public double? roomNb         { get; set; }
-       public int?  bathNb           { get; set; }
-       public int?  buildYear        { get; set; }
+       public int?  surfaceLiving       { get; set; }
+       public int?  landSurface         { get; set; }
+       public double? roomNb            { get; set; }
+       public int?  bathNb              { get; set; }
+       public int?  buildYear           { get; set; }
 
 
        private int catCode;
