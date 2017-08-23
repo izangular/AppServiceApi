@@ -47,11 +47,9 @@ namespace AppServiceApi.Util.Helper
                                 reverseGeoCodeResult.Zip = addr.short_name;
                                 break;
                             case "administrative_area_level_1":
-                                reverseGeoCodeResult.Town = addr.long_name;
-                                break;
                             case "locality":
-                                city = addr.long_name;
-                                break;
+                                reverseGeoCodeResult.Town = (String.IsNullOrEmpty(reverseGeoCodeResult.Town)) ? addr.long_name : reverseGeoCodeResult.Town;
+                                break;                           
                             default:
                                 break;
                         }
