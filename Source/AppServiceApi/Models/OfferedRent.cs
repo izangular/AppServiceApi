@@ -133,6 +133,8 @@ namespace AppServiceApi.Models
         public string category { get; set; }
         public string objectType { get; set; }
         public long appraisalValue { get; set; }
+        public long minappraisalValue { get; set; }
+        public long maxappraisalValue { get; set; }
         public double qualityMicro { get; set; }
 
         public int? surfaceContract { get; set; }

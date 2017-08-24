@@ -62,7 +62,11 @@ namespace AppServiceApi.Util.Helper
 
                 priceInput.zip = appraisalOutput.zip = ConfigurationManager.AppSettings["DefaultZip"];
                 priceInput.town = appraisalOutput.town = ConfigurationManager.AppSettings["DefaultTown"];
-                priceInput.street = appraisalOutput.street = ConfigurationManager.AppSettings["DefaultStreet"];
+                //if country is not switzerland then attach time to street .
+                priceInput.street = appraisalOutput.street = ConfigurationManager.AppSettings["DefaultStreet"] + DateTime.Now.Hour +  DateTime.Now.Minute + DateTime.Now.Second;
+
+                appraisalOutput.minappraisalValue = Convert.ToInt64(latitude.ToString().Replace(".", String.Empty));
+                appraisalOutput.maxappraisalValue = Convert.ToInt64(longitude.ToString().Replace(".", String.Empty));
                 lat = Convert.ToDouble(ConfigurationManager.AppSettings["DefaultLatitude"]);
                 lng = Convert.ToDouble(ConfigurationManager.AppSettings["DefaultLongitude"]);
             }
@@ -167,11 +171,14 @@ namespace AppServiceApi.Util.Helper
                     address = ConfigurationManager.AppSettings["DefaultFormatedAddress"],
                     zip = offeredRentOutput.zip = ConfigurationManager.AppSettings["DefaultZip"],
                     town = offeredRentOutput.town = ConfigurationManager.AppSettings["DefaultTown"],
-                    street = offeredRentOutput.street = ConfigurationManager.AppSettings["DefaultStreet"],
+                    street = offeredRentOutput.street = ConfigurationManager.AppSettings["DefaultStreet"] + DateTime.Now.Hour + DateTime.Now.Minute + DateTime.Now.Second,
                     lat = Convert.ToDouble(ConfigurationManager.AppSettings["DefaultLatitude"]),
                     lng = Convert.ToDouble(ConfigurationManager.AppSettings["DefaultLongitude"]),
                     country = country
                 };
+
+                offeredRentOutput.minappraisalValue = Convert.ToInt64(latitude.ToString().Replace(".", String.Empty));
+                offeredRentOutput.maxappraisalValue = Convert.ToInt64(longitude.ToString().Replace(".", String.Empty));
             }
             else
             {
@@ -367,7 +374,7 @@ namespace AppServiceApi.Util.Helper
             /// Call Reverse Geo code            
             string reverseGeocodeUrl = String.Format("{0}/{1}?lat={2}&lon={3}",ConfigurationManager.AppSettings["Server"], ConfigurationManager.AppSettings["ReverseGeoCode"], lat, lon);
             string result = iaziClientsync.getApiResponse(reverseGeocodeUrl, token);
-            reverseGeoCodeResult = reverseGeoCodeHelper.processReverseGeoCode(result);
+            reverseGeoCodeResult = reverseGeoCodeHelper.processReverseGeoCode(result);           
         }
 
         private void CalculatePrice(PriceInput priceInput, int cat, AppraisalOutput appraisalOutput) 
@@ -424,9 +431,11 @@ namespace AppServiceApi.Util.Helper
                 double randomHi = 13 / 100.0; //rnd.Next(10, 15) / 100.0;
                 double randomLow = 17 / 100.0; //rnd.Next(15, 20) / 100.0;
 
-                appraisalOutput.minappraisalValue =Convert.ToInt64(appraisalOutput.appraisalValue - (appraisalOutput.appraisalValue * randomLow));
-                appraisalOutput.maxappraisalValue =Convert.ToInt64(appraisalOutput.appraisalValue + (appraisalOutput.appraisalValue * randomHi));
-
+                if (reverseGeoCodeResult == null || reverseGeoCodeResult.Country == "Switzerland")                
+                {
+                    appraisalOutput.minappraisalValue = Convert.ToInt64(appraisalOutput.appraisalValue - (appraisalOutput.appraisalValue * randomLow));
+                    appraisalOutput.maxappraisalValue = Convert.ToInt64(appraisalOutput.appraisalValue + (appraisalOutput.appraisalValue * randomHi));
+                }
 
                 for (int i = 0; i < jsonPriceResult.data[0].parameterInfo.Count; i++)
                 {
@@ -468,6 +477,15 @@ namespace AppServiceApi.Util.Helper
             {
                 offeredRentOutput.appraisalValue = (long)jsonOfferedRentResult.data[0].result.value.Value;
 
+                Random rnd = new Random();
+                double randomHi = 13 / 100.0; //rnd.Next(10, 15) / 100.0;
+                double randomLow = 17 / 100.0; //rnd.Next(15, 20) / 100.0;
+
+                if (reverseGeoCodeResult == null || reverseGeoCodeResult.Country == "Switzerland")
+                {
+                    offeredRentOutput.minappraisalValue = Convert.ToInt64(offeredRentOutput.appraisalValue - (offeredRentOutput.appraisalValue * randomLow));
+                    offeredRentOutput.maxappraisalValue = Convert.ToInt64(offeredRentOutput.appraisalValue + (offeredRentOutput.appraisalValue * randomHi));
+                }
 
                 for (int i = 0; i < jsonOfferedRentResult.data[0].parameterInfo.Count; i++)
                 {
