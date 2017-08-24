@@ -22,6 +22,7 @@ namespace AppServiceApi.Models
        public double? roomNb            { get; set; }
        public int?  bathNb              { get; set; }
        public int?  buildYear           { get; set; }
+       public int? realEstateId         { get; set; }
 
 
        private int catCode;

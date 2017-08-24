@@ -61,7 +61,7 @@ namespace AppServiceApi.Controllers
                     return Request.CreateResponse(HttpStatusCode.BadRequest, ModelState);                
 
                 apiManager = new APIManager(token);
-                AppServiceApi.Models.AppraisalOutput appraisalOutput = apiManager.processImageLatLon(apiInput.imageBase64, apiInput.latitude, apiInput.longitude);
+                AppServiceApi.Models.AppraisalOutput appraisalOutput = apiManager.processImageLatLon(apiInput.imageBase64, apiInput.latitude, apiInput.longitude, apiInput.deviceId);
 
                 return Request.CreateResponse(HttpStatusCode.OK, appraisalOutput);
             }

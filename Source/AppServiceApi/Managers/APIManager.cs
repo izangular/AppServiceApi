@@ -6,6 +6,8 @@ using System.Configuration;
 using System.IO;
 using System.Net.Http;
 using System.Threading.Tasks;
+using AppServiceApi.Core.Model;
+using AppServiceApi.Core.Repository;
 
 
 namespace AppServiceApi.Util.Helper
@@ -30,7 +32,7 @@ namespace AppServiceApi.Util.Helper
             iaziClientsync = new IAZIClientSync();
         }
 
-        public AppraisalOutput processImageLatLon(string imageBase64 , double? latitude , double? longitude)
+        public AppraisalOutput processImageLatLon(string imageBase64 , double? latitude , double? longitude, string deviceId)
         {
             AppraisalOutput appraisalOutput = new AppraisalOutput();
             GoogleVisionApi googleVisionApi = new GoogleVisionApi();
@@ -105,6 +107,30 @@ namespace AppServiceApi.Util.Helper
 
 
             CalculatePrice(priceInput, category, appraisalOutput);
+
+            //Saving Property Details//
+            try
+            {
+                RealEstateData realEsateData = new RealEstateData();
+                realEsateData.Image = imageBase64;
+                realEsateData.Latitude = (decimal)latitude;
+                realEsateData.Longitude = (decimal)longitude;
+                realEsateData.DeviceId = deviceId;
+
+                RealEstateAppraise realEstateAppraise = new RealEstateAppraise();
+                //realEstateAppraise.RealEstateId =  new Guid();
+                realEstateAppraise.AppraisalValue = appraisalOutput.appraisalValue;
+                realEstateAppraise.MinAppraisalValue = appraisalOutput.minappraisalValue;
+                realEstateAppraise.MaxAppraisalValue = appraisalOutput.maxappraisalValue;
+
+                SavePricePropertyDetails(realEsateData, realEstateAppraise);
+
+            }
+            catch
+            {
+                return appraisalOutput;
+            }
+            
 
             return appraisalOutput;
 
@@ -199,13 +225,46 @@ namespace AppServiceApi.Util.Helper
         {
             PriceInput priceInput = MapDetailInputToPriceInput(detailInput);
             AppraisalOutput appraisalOutput = new AppraisalOutput();
+
             CalculatePrice(priceInput, detailInput.catCode??0 , appraisalOutput);
+
             appraisalOutput.microRating = detailInput.microRating??0;
             appraisalOutput.zip = detailInput.zip;
             appraisalOutput.town = detailInput.town;
             appraisalOutput.street = detailInput.street;
             appraisalOutput.CatCode = detailInput.catCode??0;
             appraisalOutput.country = detailInput.country;
+
+            ////Saving 
+            try
+            {
+                RealEstateData realEstateData = new RealEstateData();
+                realEstateData.SurfaceLiving = detailInput.surfaceLiving;
+                realEstateData.LandSurface = detailInput.landSurface;
+                realEstateData.RoomNb = (decimal)detailInput.roomNb;
+                realEstateData.BathNb = detailInput.bathNb;
+                realEstateData.BuildYear = detailInput.buildYear;
+                realEstateData.MicroRating = (decimal)detailInput.microRating;
+                realEstateData.CatCode = detailInput.catCode;
+                realEstateData.AddressZip = detailInput.zip;
+                realEstateData.AddressTown = detailInput.town;
+                realEstateData.AddressStreet = detailInput.street;
+                realEstateData.Country = detailInput.country;
+                realEstateData.DeviceId = detailInput.deviceId;
+
+                RealEstateAppraise realEstateAppraise = new RealEstateAppraise();
+                //realEstateAppraise.RealEstateId =  new Guid();
+                realEstateAppraise.AppraisalValue = appraisalOutput.appraisalValue;
+                realEstateAppraise.MinAppraisalValue = appraisalOutput.minappraisalValue;
+                realEstateAppraise.MaxAppraisalValue = appraisalOutput.maxappraisalValue;
+
+                SavePricePropertyDetails(realEstateData, realEstateAppraise);
+
+            }
+            catch
+            {
+                return appraisalOutput;
+            }
 
             return appraisalOutput;
         }
@@ -450,6 +509,12 @@ namespace AppServiceApi.Util.Helper
 
                 }
             }
+        }
+
+        private void SavePricePropertyDetails(RealEstateData realEstateData, RealEstateAppraise realEsateAppraise)
+        {
+            RealEstateRepository realEstateRepository = new RealEstateRepository();
+            realEstateRepository.savePricePropertyDetails(realEstateData, realEsateAppraise);
         }
 
         #endregion
