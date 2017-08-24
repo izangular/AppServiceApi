@@ -8,34 +8,34 @@ namespace AppServiceApi.Core.Model
 {
     public class RealEstateRent
     {
-        
-        RealEstateRent()
+
+        public RealEstateRent()
         {
-            RealEstateId = 0;
-            AppraisalValue = 0;
-            MinAppraisalValue = 0;
-            MaxAppraisalValue = 0;
+            RealEstateId = null;
+            AppraisalValue = null;
+            MinAppraisalValue = null;
+            MaxAppraisalValue = null;
         }
 
         /// <summary>
         /// RealEstateId
         /// </summary>
-        public long RealEstateId { get; set; }
+        public long? RealEstateId { get; set; }
 
         /// <summary>
         /// Appraised Value
         /// </summary>
-        public int AppraisalValue { get; set; }
+        public long? AppraisalValue { get; set; }
 
         /// <summary>
         /// Min Appraised value
         /// </summary>
-        public int MinAppraisalValue { get; set; }
+        public long? MinAppraisalValue { get; set; }
 
         /// <summary>
         /// MaxAppraisedValue
         /// </summary>
-        public int MaxAppraisalValue { get; set; }
+        public long? MaxAppraisalValue { get; set; }
     }
 
 }

@@ -23,12 +23,15 @@ namespace AppServiceApi.Core.Model
             CatCode = null;
             AddressZip = null;
             AddressStreet = null;
-            lift = null;
+            Lift = null;
             NNFilter = null;
             NbCompareProperties = null;
             Country = null;
             DeviceId = null;
             UserId = null;
+            ImageSize = null;
+            ImageWidth = null;
+            ImageHeight = null;
         }
 
 
@@ -78,6 +81,16 @@ namespace AppServiceApi.Core.Model
         public int? BuildYear { get; set; }
 
         /// <summary>
+        /// Lift
+        /// </summary>
+        public int? Lift { get; set; }
+
+        /// <summary>
+        /// ObjectTypeCode
+        /// </summary>
+        public int? ObjectTypeCode { get; set; }
+
+        /// <summary>
         /// MicroQuality
         /// </summary>
         public decimal? MicroRating { get; set; }
@@ -103,11 +116,6 @@ namespace AppServiceApi.Core.Model
         public string AddressTown { get; set; }
 
         /// <summary>
-        /// Lift
-        /// </summary>
-        public bool? lift { get; set; }
-
-        /// <summary>
         /// Filter description for Rent
         /// </summary>
         public string NNFilter { get; set; }
@@ -131,6 +139,22 @@ namespace AppServiceApi.Core.Model
         /// Auth service UserID
         /// </summary>
         public int? UserId { get; set; }
+
+        /// <summary>
+        /// Image Size
+        /// </summary>
+        public Int64? ImageSize { get; set; }
+
+        /// <summary>
+        /// Image Width
+        /// </summary>
+        public int? ImageWidth { get; set; }
+
+        /// <summary>
+        /// Image Height
+        /// </summary>
+        public int? ImageHeight { get; set; }
+
 
     }
 }

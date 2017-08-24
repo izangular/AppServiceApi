@@ -10,6 +10,7 @@ using AppServiceApi.Core.Model;
 using AppServiceApi.Core.Repository;
 
 
+
 namespace AppServiceApi.Util.Helper
 {
     public class APIManager 
@@ -52,7 +53,7 @@ namespace AppServiceApi.Util.Helper
                 imageBase64 = getImageAndConvertbase64();
                 category = googleVisionApi.fetchCategoryForImage(imageBase64);
             }
-           
+
             getAddressForLatLong(latitude??0.0, longitude??0.0);
 
             if (reverseGeoCodeResult.Country != "Switzerland")
@@ -121,6 +122,14 @@ namespace AppServiceApi.Util.Helper
                 realEsateData.Longitude = (decimal)longitude;
                 realEsateData.DeviceId = deviceId;
 
+                using (var ms = new MemoryStream(Convert.FromBase64String(imageBase64)))
+                {
+                    System.Drawing.Image img = System.Drawing.Image.FromStream(ms);
+                    realEsateData.ImageSize = ms.Length / 1024;
+                    realEsateData.ImageWidth = img.Width;
+                    realEsateData.ImageHeight = img.Height;
+                }
+
                 RealEstateAppraise realEstateAppraise = new RealEstateAppraise();
                 //realEstateAppraise.RealEstateId =  new Guid();
                 realEstateAppraise.AppraisalValue = appraisalOutput.appraisalValue;
@@ -140,7 +149,7 @@ namespace AppServiceApi.Util.Helper
 
         }
 
-        public OfferedRentOutput processImageLatLonForOfferedRent(string imageBase64 , double? latitude , double? longitude)
+        public OfferedRentOutput processImageLatLonForOfferedRent(string imageBase64 , double? latitude , double? longitude, string deviceId)
         {
             OfferedRentOutput offeredRentOutput = new OfferedRentOutput();
             GoogleVisionApi googleVisionApi = new GoogleVisionApi();
@@ -224,6 +233,37 @@ namespace AppServiceApi.Util.Helper
 
             CalculateRent(offeredRentInput, offeredRentOutput);
 
+            //Saving Property Details//
+            try
+            {
+                RealEstateData realEsateData = new RealEstateData();
+                realEsateData.Image = imageBase64;
+                realEsateData.Latitude = (decimal)latitude;
+                realEsateData.Longitude = (decimal)longitude;
+                realEsateData.DeviceId = deviceId;
+
+                using (var ms = new MemoryStream(Convert.FromBase64String(imageBase64)))
+                {
+                    System.Drawing.Image img = System.Drawing.Image.FromStream(ms);
+                    realEsateData.ImageSize = ms.Length / 1024;
+                    realEsateData.ImageWidth = img.Width;
+                    realEsateData.ImageHeight = img.Height;
+                }
+
+                RealEstateRent realEstateRent = new RealEstateRent();
+                //realEstateAppraise.RealEstateId =  new Guid();
+                realEstateRent.AppraisalValue = offeredRentOutput.appraisalValue;
+                realEstateRent.MinAppraisalValue = offeredRentOutput.minappraisalValue;
+                realEstateRent.MaxAppraisalValue = offeredRentOutput.maxappraisalValue;
+
+                SaveRentPropertyDetails(realEsateData, realEstateRent);
+
+            }
+            catch
+            {
+                return offeredRentOutput;
+            }
+
             return offeredRentOutput;
         }
 
@@ -286,6 +326,40 @@ namespace AppServiceApi.Util.Helper
             offeredRentOutput.street = offeredRentInput.address.street;
             offeredRentOutput.CategoryCode = offeredRentInput.categoryCode;
             offeredRentOutput.country = offeredRentInput.address.country;
+
+            ////Saving 
+            try
+            {
+                RealEstateData realEstateData = new RealEstateData();
+                realEstateData.SurfaceLiving = offeredRentInput.surfaceContract;
+                //realEstateData.LandSurface = offeredRentInput.landSurface;
+                realEstateData.RoomNb = (decimal)offeredRentInput.roomNb;
+                //realEstateData.BathNb = offeredRentInput.bathNb;
+                realEstateData.BuildYear = offeredRentInput.buildYear;
+                realEstateData.Lift = offeredRentInput.lift;
+                realEstateData.ObjectTypeCode = offeredRentInput.objectTypeCode;
+                realEstateData.MicroRating = (decimal)offeredRentInput.qualityMicro;
+                realEstateData.CatCode = offeredRentInput.categoryCode;
+                realEstateData.AddressZip = offeredRentInput.address.zip;
+                realEstateData.AddressTown = offeredRentInput.address.town;
+                realEstateData.AddressStreet = offeredRentInput.address.street;
+                realEstateData.Country = offeredRentInput.address.country;
+                realEstateData.DeviceId = offeredRentInput.deviceId;
+
+                RealEstateRent realEstateRent = new RealEstateRent();
+                //realEstateAppraise.RealEstateId =  new Guid();
+                realEstateRent.AppraisalValue = offeredRentOutput.appraisalValue;
+                realEstateRent.MinAppraisalValue = offeredRentOutput.minappraisalValue;
+                realEstateRent.MaxAppraisalValue = offeredRentOutput.maxappraisalValue;
+
+                SaveRentPropertyDetails(realEstateData, realEstateRent);
+
+            }
+            catch
+            {
+                return offeredRentOutput;
+            }
+
 
             return offeredRentOutput;
         }
@@ -533,6 +607,25 @@ namespace AppServiceApi.Util.Helper
         {
             RealEstateRepository realEstateRepository = new RealEstateRepository();
             realEstateRepository.savePricePropertyDetails(realEstateData, realEsateAppraise);
+        }
+
+        private void SaveRentPropertyDetails(RealEstateData realEstateData, RealEstateRent realEstateRent)
+        {
+            RealEstateRepository realEstateRepository = new RealEstateRepository();
+            realEstateRepository.saveRentPropertyDetails(realEstateData, realEstateRent);
+        }
+
+        private void GetImageSize(string base64Image, ref Int64 imageSize, ref int imageWidth, ref int imageHeight)
+        {
+            byte[] image = Convert.FromBase64String(base64Image);
+            using (var ms = new MemoryStream(image))
+            {
+                System.Drawing.Image img = System.Drawing.Image.FromStream(ms);
+                imageSize = ms.Length / 1024;
+                imageWidth = img.Width;
+                imageHeight = img.Height;
+                //var u = new Tuple<int, int>(img.Width, img.Height); // or some other data container
+            }
         }
 
         #endregion

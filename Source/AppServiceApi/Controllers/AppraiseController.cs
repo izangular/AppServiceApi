@@ -110,7 +110,7 @@ namespace AppServiceApi.Controllers
                     return Request.CreateResponse(HttpStatusCode.BadRequest, ModelState);
 
                 apiManager = new APIManager(token);
-                AppServiceApi.Models.OfferedRentOutput offeredRentOutput = apiManager.processImageLatLonForOfferedRent(apiInput.imageBase64, apiInput.lat, apiInput.lng);
+                AppServiceApi.Models.OfferedRentOutput offeredRentOutput = apiManager.processImageLatLonForOfferedRent(apiInput.imageBase64, apiInput.lat, apiInput.lng, apiInput.deviceId);
 
                 return Request.CreateResponse(HttpStatusCode.OK, offeredRentOutput);
             }
