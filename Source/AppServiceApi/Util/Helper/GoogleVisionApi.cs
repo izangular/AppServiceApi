@@ -39,7 +39,71 @@ namespace AppServiceApi.Util.Helper
             
         }
 
-        public int fetchCategoryForImage(string imageBase64)
+        public ImageCategory fetchCategoryForImage(string imageBase64)
+        {
+            int category = 0;
+            double house = 0.0;
+            double apartment = 0.0;
+            string firsttwoLabels = String.Empty;
+            ImageCategory imageCategory = new ImageCategory();
+            GoogleVisionApiOutput googleVisionApiOutput = AnalyseImage(imageBase64);
+
+            if (googleVisionApiOutput.responses != null && googleVisionApiOutput.responses.Count > 0 && googleVisionApiOutput.responses[0].labelAnnotations.Count > 0)
+            {
+                /* Mark the parameters */
+                foreach (LabelAnnotation labelAnnotation in googleVisionApiOutput.responses[0].labelAnnotations)
+                {
+                    switch (labelAnnotation.description)
+                    {                      
+                        case "apartment":
+                            apartment = labelAnnotation.score;
+                            break;
+                       
+                        case "house" :
+                            house = labelAnnotation.score;
+                            break;
+                    }
+
+                }
+
+                /* Statistically analysed condition from RPO */
+                if (apartment > 0 || house > 0)
+                {
+                    if (apartment > 0.6561459)
+                        imageCategory.CategoryCode = 6;
+                    else
+                    {
+                        if (house > 0.6121141)
+                            imageCategory.CategoryCode = 5;
+                        else
+                            imageCategory.CategoryCode = 6;
+                    }
+                }
+                else                
+                    imageCategory.CategoryCode = -1;// Not house or Apartment
+
+
+                /* Set the Correct text */
+                if (imageCategory.CategoryCode == -1)
+                    imageCategory.CategoryText = googleVisionApiOutput.responses[0].labelAnnotations[0].description + " / " + googleVisionApiOutput.responses[0].labelAnnotations[1].description;
+                else if (imageCategory.CategoryCode == 5)
+                    imageCategory.CategoryText = "Single family House";
+                else if (imageCategory.CategoryCode == 6)
+                    imageCategory.CategoryText = "Condominum";
+
+            }
+
+            return imageCategory;
+
+        }
+
+        /// <summary>
+        /// Old function to determine the type of input image (Not used kept for reference)
+        /// </summary>
+        /// <param name="imageBase64"></param>
+        /// <returns></returns>
+
+        public int fetchCategoryForImage_V1(string imageBase64)
         {
             int category = 0;
             int house = 0;

@@ -22,5 +22,10 @@ namespace AppServiceApi.Models
         public List<LabelAnnotation> labelAnnotations { get; set; }
     }
    
+    public class ImageCategory
+    {
+        public int CategoryCode;
+        public string CategoryText;
+    }
 
 }

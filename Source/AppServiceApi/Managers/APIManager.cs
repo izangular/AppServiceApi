@@ -38,7 +38,7 @@ namespace AppServiceApi.Util.Helper
             AppraisalOutput appraisalOutput = new AppraisalOutput();
             GoogleVisionApi googleVisionApi = new GoogleVisionApi();
             PriceInput priceInput = new PriceInput();
-            int category;
+            ImageCategory imageCategory;
             string country;
             string countryCode;
             double? lat;
@@ -46,12 +46,12 @@ namespace AppServiceApi.Util.Helper
 
             try
             {
-                category = googleVisionApi.fetchCategoryForImage(imageBase64);
+                imageCategory = googleVisionApi.fetchCategoryForImage(imageBase64);
             }
             catch(Exception)
             {
                 imageBase64 = getImageAndConvertbase64();
-                category = googleVisionApi.fetchCategoryForImage(imageBase64);
+                imageCategory = googleVisionApi.fetchCategoryForImage(imageBase64);
             }
 
             getAddressForLatLong(latitude??0.0, longitude??0.0);
@@ -83,35 +83,35 @@ namespace AppServiceApi.Util.Helper
                 lng = (double)longitude;             
             }
 
-            //country = (reverseGeoCodeResult.Country != "Switzerland") ? "Switzerland" : reverseGeoCodeResult.Country;
-            //countryCode = (country != "Switzerland") ? "CH" : "CH";
+            if (imageCategory.CategoryCode != -1) { 
+                getMicroRating(imageCategory.CategoryCode, lat ?? 0.0, lng ?? 0.0, countryCode);
+                priceInput.qualityMicro = appraisalOutput.microRating = ratingResponse.results.microRatingClass1To5 ?? 3;
+            }
 
-            getMicroRating(category, lat ?? 0.0, lng ?? 0.0,countryCode);
-
-            priceInput.qualityMicro = appraisalOutput.microRating = ratingResponse.results.microRatingClass1To5 ?? 3;
-            //priceInput.zip = appraisalOutput.zip = reverseGeoCodeResult.Zip;
-            //priceInput.town = appraisalOutput.town = reverseGeoCodeResult.Town;
-            //priceInput.street = appraisalOutput.street = reverseGeoCodeResult.Street;
-            //appraisalOutput.country = reverseGeoCodeResult.Country;
+                     
             appraisalOutput.country = country;
-            appraisalOutput.CatCode = category;
-            
-            switch(category)
+            appraisalOutput.CatCode = imageCategory.CategoryCode;
+
+            switch (imageCategory.CategoryCode)
             {
                 case 5 :
                      priceInput.surfaceLiving = Convert.ToInt16(ConfigurationManager.AppSettings["A2SurfaceLivingDefault"]) ;  //set default for A2 for Surface 
-                     appraisalOutput.category = " Single family House";
+                     appraisalOutput.category = imageCategory.CategoryText; //" Single family House";
                      break;
                 case 6:
                      priceInput.surfaceLiving = Convert.ToInt16(ConfigurationManager.AppSettings["A3SurfaceLivingDefault"]) ;;
-                     appraisalOutput.category = " Condominium";
+                     appraisalOutput.category = imageCategory.CategoryText; //" Condominium";
+                     break;
+                case -1:
+                     appraisalOutput.category = imageCategory.CategoryText; //Set the first two labels that are returned by Google 
                      break;
                 default:
                      break;
             }
 
 
-            CalculatePrice(priceInput, category, appraisalOutput);
+             if (imageCategory.CategoryCode != -1)
+                CalculatePrice(priceInput, imageCategory.CategoryCode, appraisalOutput);
 
             //Saving Property Details//
             try
@@ -154,18 +154,18 @@ namespace AppServiceApi.Util.Helper
             OfferedRentOutput offeredRentOutput = new OfferedRentOutput();
             GoogleVisionApi googleVisionApi = new GoogleVisionApi();
             OfferedRentInput offeredRentInput = new OfferedRentInput();
-            int category;
+            ImageCategory imageCategory;
             string country;
             string countryCode;
 
             try
             {
-                category = googleVisionApi.fetchCategoryForImage(imageBase64);
+                imageCategory = googleVisionApi.fetchCategoryForImage(imageBase64);
             }
             catch (Exception)
             {
                 imageBase64 = getImageAndConvertbase64();
-                category = googleVisionApi.fetchCategoryForImage(imageBase64);
+                imageCategory = googleVisionApi.fetchCategoryForImage(imageBase64);
             }
           
             getAddressForLatLong(latitude ?? 0.0, longitude ?? 0.0);
@@ -206,32 +206,39 @@ namespace AppServiceApi.Util.Helper
                 };
             }
 
-            getMicroRating(category, offeredRentInput.address.lat ?? 0.0, offeredRentInput.address.lng ?? 0.0, countryCode);
-            offeredRentInput.qualityMicro = offeredRentOutput.qualityMicro = ratingResponse.results.microRatingClass1To5 ?? 3;
+            if (imageCategory.CategoryCode != -1)
+            {
+                getMicroRating(imageCategory.CategoryCode, offeredRentInput.address.lat ?? 0.0, offeredRentInput.address.lng ?? 0.0, countryCode);
+                offeredRentInput.qualityMicro = offeredRentOutput.qualityMicro = ratingResponse.results.microRatingClass1To5 ?? 3;
+                offeredRentInput.ortId = getOrtId(countryCode, offeredRentInput.address.lat ?? 0.0, offeredRentInput.address.lng ?? 0.0, "en-US");
+            }
 
-            offeredRentInput.ortId = getOrtId(countryCode, offeredRentInput.address.lat ?? 0.0, offeredRentInput.address.lng ?? 0.0, "en-US");
+           
 
             offeredRentOutput.country = country;
-            offeredRentOutput.CategoryCode = category;
+            offeredRentOutput.CategoryCode = imageCategory.CategoryCode;
 
-            switch (category)
+            switch (imageCategory.CategoryCode)
             {
                 case 5:
                     offeredRentInput.surfaceContract = Convert.ToInt16(ConfigurationManager.AppSettings["A2SurfaceLivingDefault"]);  //set default for A2 for Surface 
                     offeredRentInput.categoryCode = offeredRentOutput.CategoryCode;
-                    offeredRentOutput.category = " Single family House";
+                    offeredRentOutput.category = imageCategory.CategoryText; //" Single family House";
                     break;
                 case 6:
                     offeredRentInput.surfaceContract = Convert.ToInt16(ConfigurationManager.AppSettings["A3SurfaceLivingDefault"]);
                     offeredRentInput.categoryCode = offeredRentOutput.CategoryCode;
-                    offeredRentOutput.category = " Condominium";
+                    offeredRentOutput.category = imageCategory.CategoryText; //" Condominium";
+                    break;
+                case -1:
+                    offeredRentOutput.category = imageCategory.CategoryText;
                     break;
                 default:
                     break;
             }
 
-
-            CalculateRent(offeredRentInput, offeredRentOutput);
+            if (imageCategory.CategoryCode != -1)
+                CalculateRent(offeredRentInput, offeredRentOutput);
 
             //Saving Property Details//
             try
