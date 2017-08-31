@@ -148,6 +148,11 @@
     <Content Include="Resources\Images\Commercial1.jpg" />
     <Content Include="Resources\Images\imagereader1.jpg" />
     <Content Include="Resources\Images\imagereader4.jpg" />
+    <Content Include="Resources\Swagger Testcases\BillGates.txt" />
+    <Content Include="Resources\Swagger Testcases\Bird.txt" />
+    <Content Include="Resources\Swagger Testcases\Condominium.txt" />
+    <Content Include="Resources\Swagger Testcases\Dog.txt" />
+    <Content Include="Resources\Swagger Testcases\SingleFamily.txt" />
     <Content Include="Web.config">
       <SubType>Designer</SubType>
     </Content>

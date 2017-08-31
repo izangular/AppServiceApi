@@ -30,7 +30,8 @@ namespace AppServiceApi.Util.Helper
             try
             {
                 string result = IAZIClientSync.postApiRequest(url, postData, null);
-                return JsonConvert.DeserializeObject<GoogleVisionApiOutput>(result);
+                GoogleVisionApiOutput googleVisionApiOutput = JsonConvert.DeserializeObject<GoogleVisionApiOutput>(result);
+                return googleVisionApiOutput;
             }
             catch(Exception ex)
             {
@@ -42,8 +43,15 @@ namespace AppServiceApi.Util.Helper
         public ImageCategory fetchCategoryForImage(string imageBase64)
         {
             int category = 0;
+
             double house = 0.0;
             double apartment = 0.0;
+            double building = 0.0;
+            double cottage = 0.0;
+            double home = 0.0;
+            double neighbourhood = 0.0;
+            double condominium = 0.0;
+            
             string firsttwoLabels = String.Empty;
             ImageCategory imageCategory = new ImageCategory();
             GoogleVisionApiOutput googleVisionApiOutput = AnalyseImage(imageBase64);
@@ -62,12 +70,32 @@ namespace AppServiceApi.Util.Helper
                         case "house" :
                             house = labelAnnotation.score;
                             break;
+
+                        case "home" :
+                            home = labelAnnotation.score;
+                            break;
+
+                        case "condominium":
+                            condominium = labelAnnotation.score;
+                            break;
+
+                        case "cottage":
+                            cottage = labelAnnotation.score;
+                            break;
+
+                        case "building":
+                            building = labelAnnotation.score;
+                            break;
+
+                        case "neighbourhood" :
+                            neighbourhood = labelAnnotation.score;
+                            break;
                     }
 
                 }
 
                 /* Statistically analysed condition from RPO */
-                if (apartment > 0 || house > 0)
+                if (apartment > 0 || house > 0 || home > 0 || condominium > 0 || cottage > 0 || building > 0 || neighbourhood > 0)
                 {
                     if (apartment > 0.6561459)
                         imageCategory.CategoryCode = 6;
@@ -85,7 +113,13 @@ namespace AppServiceApi.Util.Helper
 
                 /* Set the Correct text */
                 if (imageCategory.CategoryCode == -1)
-                    imageCategory.CategoryText = googleVisionApiOutput.responses[0].labelAnnotations[0].description + " / " + googleVisionApiOutput.responses[0].labelAnnotations[1].description;
+                {
+                    if (googleVisionApiOutput.responses[0].faceAnnotations != null)
+                        imageCategory.CategoryText = "Face / ";
+
+                    imageCategory.CategoryText = imageCategory.CategoryText + googleVisionApiOutput.responses[0].labelAnnotations[0].description + " / " + googleVisionApiOutput.responses[0].labelAnnotations[1].description;
+
+                }
                 else if (imageCategory.CategoryCode == 5)
                     imageCategory.CategoryText = "Single family House";
                 else if (imageCategory.CategoryCode == 6)

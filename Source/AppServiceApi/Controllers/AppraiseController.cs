@@ -61,6 +61,14 @@ namespace AppServiceApi.Controllers
                     return Request.CreateResponse(HttpStatusCode.BadRequest, ModelState);                
 
                 apiManager = new APIManager(token);
+
+                //string userAgent = String.Empty;
+
+                //if (Request.Headers.UserAgent != null)
+                //    userAgent = Convert.ToString(Request.Headers.UserAgent);
+
+                string userAgent = String.Empty;
+
                 AppServiceApi.Models.AppraisalOutput appraisalOutput = apiManager.processImageLatLon(apiInput.imageBase64, apiInput.latitude, apiInput.longitude, apiInput.deviceId);
 
                 return Request.CreateResponse(HttpStatusCode.OK, appraisalOutput);
@@ -85,7 +93,12 @@ namespace AppServiceApi.Controllers
                 if (!ModelState.IsValid)
                     return Request.CreateResponse(HttpStatusCode.BadRequest, ModelState);
 
-                apiManager = new APIManager(token); 
+                //string userAgent = String.Empty;
+
+                //if (Request.Headers.UserAgent != null)
+                //    userAgent = Convert.ToString(Request.Headers.UserAgent);
+
+                apiManager = new APIManager(token);
                 AppServiceApi.Models.AppraisalOutput appraisalOutput = apiManager.processDetailInput(detailInput);
                 return Request.CreateResponse(HttpStatusCode.OK, appraisalOutput);
             }
@@ -109,8 +122,13 @@ namespace AppServiceApi.Controllers
                 if (!ModelState.IsValid)
                     return Request.CreateResponse(HttpStatusCode.BadRequest, ModelState);
 
+                string userAgent = String.Empty;
+
+                //if (Request.Headers.UserAgent != null)
+                //    userAgent = Convert.ToString(Request.Headers.UserAgent);
+
                 apiManager = new APIManager(token);
-                AppServiceApi.Models.OfferedRentOutput offeredRentOutput = apiManager.processImageLatLonForOfferedRent(apiInput.imageBase64, apiInput.lat, apiInput.lng, apiInput.deviceId);
+                AppServiceApi.Models.OfferedRentOutput offeredRentOutput = apiManager.processImageLatLonForOfferedRent(apiInput.imageBase64, apiInput.lat, apiInput.lng, apiInput.deviceId, userAgent);
 
                 return Request.CreateResponse(HttpStatusCode.OK, offeredRentOutput);
             }
@@ -132,7 +150,13 @@ namespace AppServiceApi.Controllers
                     return Request.CreateResponse(HttpStatusCode.BadRequest, ModelState);
 
                 apiManager = new APIManager(token);
-                AppServiceApi.Models.OfferedRentOutput offeredRentOutput = apiManager.processOfferedRentInput(offeredRentInput);
+
+                string userAgent = String.Empty;
+
+                //if (Request.Headers.UserAgent != null)
+                //    userAgent = Convert.ToString(Request.Headers.UserAgent);
+
+                AppServiceApi.Models.OfferedRentOutput offeredRentOutput = apiManager.processOfferedRentInput(offeredRentInput, userAgent);
 
                 return Request.CreateResponse(HttpStatusCode.OK, offeredRentOutput);
             }

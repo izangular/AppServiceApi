@@ -116,31 +116,13 @@ namespace AppServiceApi.Util.Helper
             //Saving Property Details//
             try
             {
-                RealEstateData realEsateData = new RealEstateData();
-                realEsateData.Image = imageBase64;
-                realEsateData.Latitude = (decimal)latitude;
-                realEsateData.Longitude = (decimal)longitude;
-                realEsateData.DeviceId = deviceId;
-
-                using (var ms = new MemoryStream(Convert.FromBase64String(imageBase64)))
-                {
-                    System.Drawing.Image img = System.Drawing.Image.FromStream(ms);
-                    realEsateData.ImageSize = ms.Length / 1024;
-                    realEsateData.ImageWidth = img.Width;
-                    realEsateData.ImageHeight = img.Height;
-                }
-
-                RealEstateAppraise realEstateAppraise = new RealEstateAppraise();
-                //realEstateAppraise.RealEstateId =  new Guid();
-                realEstateAppraise.AppraisalValue = appraisalOutput.appraisalValue;
-                realEstateAppraise.MinAppraisalValue = appraisalOutput.minappraisalValue;
-                realEstateAppraise.MaxAppraisalValue = appraisalOutput.maxappraisalValue;
-
-                SavePricePropertyDetails(realEsateData, realEstateAppraise);
-
+              PriceData priceData = MapPriceBuisnessDataToDatabaseModel(imageBase64, latitude, longitude, deviceId, appraisalOutput);
+               SavePricePropertyDetails(priceData);
             }
-            catch
+            catch(Exception ex)
             {
+                 RealEstateRepository realEstateRepository = new RealEstateRepository();
+                 realEstateRepository.saveException(ex.Message,Convert.ToString(ex.InnerException),ex.StackTrace);
                 return appraisalOutput;
             }
             
@@ -149,7 +131,7 @@ namespace AppServiceApi.Util.Helper
 
         }
 
-        public OfferedRentOutput processImageLatLonForOfferedRent(string imageBase64 , double? latitude , double? longitude, string deviceId)
+        public OfferedRentOutput processImageLatLonForOfferedRent(string imageBase64 , double? latitude , double? longitude, string deviceId , string userAgent)
         {
             OfferedRentOutput offeredRentOutput = new OfferedRentOutput();
             GoogleVisionApi googleVisionApi = new GoogleVisionApi();
@@ -243,31 +225,14 @@ namespace AppServiceApi.Util.Helper
             //Saving Property Details//
             try
             {
-                RealEstateData realEsateData = new RealEstateData();
-                realEsateData.Image = imageBase64;
-                realEsateData.Latitude = (decimal)latitude;
-                realEsateData.Longitude = (decimal)longitude;
-                realEsateData.DeviceId = deviceId;
-
-                using (var ms = new MemoryStream(Convert.FromBase64String(imageBase64)))
-                {
-                    System.Drawing.Image img = System.Drawing.Image.FromStream(ms);
-                    realEsateData.ImageSize = ms.Length / 1024;
-                    realEsateData.ImageWidth = img.Width;
-                    realEsateData.ImageHeight = img.Height;
-                }
-
-                RealEstateRent realEstateRent = new RealEstateRent();
-                //realEstateAppraise.RealEstateId =  new Guid();
-                realEstateRent.AppraisalValue = offeredRentOutput.appraisalValue;
-                realEstateRent.MinAppraisalValue = offeredRentOutput.minappraisalValue;
-                realEstateRent.MaxAppraisalValue = offeredRentOutput.maxappraisalValue;
-
-                SaveRentPropertyDetails(realEsateData, realEstateRent);
+                RentData rentData = MapRentBuisnessDataToDatabaseModel(imageBase64, latitude, longitude, deviceId, offeredRentOutput);
+                SaveRentPropertyDetails(rentData);
 
             }
-            catch
+            catch( Exception ex)
             {
+                RealEstateRepository realEstateRepository = new RealEstateRepository();
+                realEstateRepository.saveException(ex.Message,Convert.ToString(ex.InnerException), ex.StackTrace);
                 return offeredRentOutput;
             }
 
@@ -291,39 +256,21 @@ namespace AppServiceApi.Util.Helper
 
             ////Saving 
             try
-            {
-                RealEstateData realEstateData = new RealEstateData();
-                realEstateData.SurfaceLiving = detailInput.surfaceLiving;
-                realEstateData.LandSurface = detailInput.landSurface;
-                realEstateData.RoomNb = (decimal)detailInput.roomNb;
-                realEstateData.BathNb = detailInput.bathNb;
-                realEstateData.BuildYear = detailInput.buildYear;
-                realEstateData.MicroRating = (decimal)detailInput.microRating;
-                realEstateData.CatCode = detailInput.catCode;
-                realEstateData.AddressZip = detailInput.zip;
-                realEstateData.AddressTown = detailInput.town;
-                realEstateData.AddressStreet = detailInput.street;
-                realEstateData.Country = detailInput.country;
-                realEstateData.DeviceId = detailInput.deviceId;
-
-                RealEstateAppraise realEstateAppraise = new RealEstateAppraise();
-                //realEstateAppraise.RealEstateId =  new Guid();
-                realEstateAppraise.AppraisalValue = appraisalOutput.appraisalValue;
-                realEstateAppraise.MinAppraisalValue = appraisalOutput.minappraisalValue;
-                realEstateAppraise.MaxAppraisalValue = appraisalOutput.maxappraisalValue;
-
-                SavePricePropertyDetails(realEstateData, realEstateAppraise);
+            { 
+                SavePricePropertyDetails(MapPriceBuisnessDataToDatabaseModel(null, null, null,detailInput.deviceId, appraisalOutput));
 
             }
-            catch
+            catch(Exception ex)
             {
+                RealEstateRepository realEstateRepository = new RealEstateRepository();
+                realEstateRepository.saveException(ex.Message, Convert.ToString(ex.InnerException), ex.StackTrace);
                 return appraisalOutput;
             }
 
             return appraisalOutput;
         }
 
-        public OfferedRentOutput processOfferedRentInput(OfferedRentInput offeredRentInput)
+        public OfferedRentOutput processOfferedRentInput(OfferedRentInput offeredRentInput,string userAgent)
         {
             OfferedRentOutput offeredRentOutput = new OfferedRentOutput();
             CalculateRent(offeredRentInput, offeredRentOutput);
@@ -336,34 +283,14 @@ namespace AppServiceApi.Util.Helper
 
             ////Saving 
             try
-            {
-                RealEstateData realEstateData = new RealEstateData();
-                realEstateData.SurfaceLiving = offeredRentInput.surfaceContract;
-                //realEstateData.LandSurface = offeredRentInput.landSurface;
-                realEstateData.RoomNb = (decimal)offeredRentInput.roomNb;
-                //realEstateData.BathNb = offeredRentInput.bathNb;
-                realEstateData.BuildYear = offeredRentInput.buildYear;
-                realEstateData.Lift = offeredRentInput.lift;
-                realEstateData.ObjectTypeCode = offeredRentInput.objectTypeCode;
-                realEstateData.MicroRating = (decimal)offeredRentInput.qualityMicro;
-                realEstateData.CatCode = offeredRentInput.categoryCode;
-                realEstateData.AddressZip = offeredRentInput.address.zip;
-                realEstateData.AddressTown = offeredRentInput.address.town;
-                realEstateData.AddressStreet = offeredRentInput.address.street;
-                realEstateData.Country = offeredRentInput.address.country;
-                realEstateData.DeviceId = offeredRentInput.deviceId;
-
-                RealEstateRent realEstateRent = new RealEstateRent();
-                //realEstateAppraise.RealEstateId =  new Guid();
-                realEstateRent.AppraisalValue = offeredRentOutput.appraisalValue;
-                realEstateRent.MinAppraisalValue = offeredRentOutput.minappraisalValue;
-                realEstateRent.MaxAppraisalValue = offeredRentOutput.maxappraisalValue;
-
-                SaveRentPropertyDetails(realEstateData, realEstateRent);
+            { 
+               SaveRentPropertyDetails(MapRentBuisnessDataToDatabaseModel(null, null, null, offeredRentInput.deviceId, offeredRentOutput));
 
             }
-            catch
+            catch(Exception ex)
             {
+                RealEstateRepository realEstateRepository = new RealEstateRepository();
+                realEstateRepository.saveException(ex.Message,Convert.ToString(ex.InnerException), ex.StackTrace);
                 return offeredRentOutput;
             }
 
@@ -610,16 +537,130 @@ namespace AppServiceApi.Util.Helper
             }
         }
 
-        private void SavePricePropertyDetails(RealEstateData realEstateData, RealEstateAppraise realEsateAppraise)
+       
+        private RentData MapRentBuisnessDataToDatabaseModel(string imageBase64, double? latitude, double? longitude, string deviceId, OfferedRentOutput offeredRentOutput)
         {
-            RealEstateRepository realEstateRepository = new RealEstateRepository();
-            realEstateRepository.savePricePropertyDetails(realEstateData, realEsateAppraise);
+            RentData rentData = new RentData();
+
+            if (imageBase64 != null)
+            {
+                rentData.realestateData.Image = imageBase64;
+
+                if (latitude != null)
+                rentData.realestateData.Latitude = (decimal)latitude;
+
+                if (longitude != null)
+                rentData.realestateData.Longitude = (decimal)longitude;               
+
+                using (var ms = new MemoryStream(Convert.FromBase64String(imageBase64)))
+                {
+                    System.Drawing.Image img = System.Drawing.Image.FromStream(ms);
+                    rentData.realestateData.ImageSize = ms.Length / 1024;
+                    rentData.realestateData.ImageWidth = img.Width;
+                    rentData.realestateData.ImageHeight = img.Height;
+                }
+            }
+
+            rentData.realestateData.DeviceId = deviceId;
+
+            /* Store Address */
+            rentData.realestateData.AddressZip = offeredRentOutput.zip;
+            rentData.realestateData.AddressTown = offeredRentOutput.town;
+            rentData.realestateData.AddressStreet = offeredRentOutput.street;
+            rentData.realestateData.Country = offeredRentOutput.country;
+            rentData.realestateData.CatCode = offeredRentOutput.CategoryCode;
+
+
+            /* Store all calculated values */
+            rentData.realestateData.SurfaceLiving = offeredRentOutput.surfaceContract;
+            //priceData.realestateData.LandSurface = offeredRentOutput.landSurface;
+
+            if (offeredRentOutput.qualityMicro != null)
+            rentData.realestateData.MicroRating = (decimal)offeredRentOutput.qualityMicro;
+
+            if (offeredRentOutput.roomNb != null)
+            rentData.realestateData.RoomNb = (decimal)offeredRentOutput.roomNb;
+
+            rentData.realestateData.Lift = offeredRentOutput.lift;
+            rentData.realestateData.ObjectTypeCode = offeredRentOutput.ObjectTypeCode;
+            rentData.realestateData.BuildYear = offeredRentOutput.buildYear;
+
+            //realEstateAppraise.RealEstateId =  new Guid();
+            rentData.realestateRent.AppraisalValue = offeredRentOutput.appraisalValue;
+            rentData.realestateRent.MinAppraisalValue = offeredRentOutput.minappraisalValue;
+            rentData.realestateRent.MaxAppraisalValue = offeredRentOutput.maxappraisalValue;
+
+            return rentData;
+
+        }
+        
+        private PriceData MapPriceBuisnessDataToDatabaseModel(string imageBase64, double? latitude, double? longitude, string deviceId, AppraisalOutput appraisalOutput)
+        {
+
+            PriceData priceData = new PriceData();
+
+            /* Process Image Data */
+            if (imageBase64 != null)
+            {
+                priceData.realestateData.Image = imageBase64;
+
+                if (latitude != null)
+                priceData.realestateData.Latitude =  (decimal)latitude;
+
+                if (longitude !=null)
+                priceData.realestateData.Longitude = (decimal)longitude;                
+
+                using (var ms = new MemoryStream(Convert.FromBase64String(imageBase64)))
+                {
+                    System.Drawing.Image img = System.Drawing.Image.FromStream(ms);
+                    priceData.realestateData.ImageSize = ms.Length / 1024;
+                    priceData.realestateData.ImageWidth = img.Width;
+                    priceData.realestateData.ImageHeight = img.Height;
+                }
+            }
+
+            priceData.realestateData.DeviceId = deviceId;
+
+            /* Store Address */
+            priceData.realestateData.AddressZip = appraisalOutput.zip;
+            priceData.realestateData.AddressTown = appraisalOutput.town;
+            priceData.realestateData.AddressStreet = appraisalOutput.street;
+            priceData.realestateData.Country = appraisalOutput.country;
+            priceData.realestateData.CatCode = appraisalOutput.CatCode;
+
+            /* Store all calculated values */
+            priceData.realestateData.SurfaceLiving = appraisalOutput.surfaceLiving;
+            priceData.realestateData.LandSurface = appraisalOutput.landSurface;
+
+            if (appraisalOutput.microRating!=null)
+            priceData.realestateData.MicroRating = (decimal)appraisalOutput.microRating;
+
+            if (appraisalOutput.roomNb != null)
+            priceData.realestateData.RoomNb = (decimal)appraisalOutput.roomNb;
+            
+            priceData.realestateData.BathNb = appraisalOutput.bathNb;
+            priceData.realestateData.BuildYear = appraisalOutput.buildYear;
+            
+            //realEstateAppraise.RealEstateId =  new Guid();
+            priceData.realestateAppraise.AppraisalValue = appraisalOutput.appraisalValue;
+            priceData.realestateAppraise.MinAppraisalValue = appraisalOutput.minappraisalValue;
+            priceData.realestateAppraise.MaxAppraisalValue = appraisalOutput.maxappraisalValue;
+
+            return priceData;       
+
         }
 
-        private void SaveRentPropertyDetails(RealEstateData realEstateData, RealEstateRent realEstateRent)
+
+        private void SavePricePropertyDetails(PriceData priceData)
         {
             RealEstateRepository realEstateRepository = new RealEstateRepository();
-            realEstateRepository.saveRentPropertyDetails(realEstateData, realEstateRent);
+            realEstateRepository.savePricePropertyDetails(priceData);
+        }
+
+        private void SaveRentPropertyDetails(RentData rentData)
+        {
+            RealEstateRepository realEstateRepository = new RealEstateRepository();
+            realEstateRepository.saveRentPropertyDetails(rentData);
         }
 
         private void GetImageSize(string base64Image, ref Int64 imageSize, ref int imageWidth, ref int imageHeight)

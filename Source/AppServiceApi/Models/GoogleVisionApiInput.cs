@@ -18,6 +18,12 @@ namespace AppServiceApi.Models
                 maxResults = 10
             };
 
+            Feature faceFeature = new Feature
+            {
+                type = "FACE_DETECTION",
+                maxResults = 1
+            };           
+
             Image image = new Image
             {
                 content = ""
@@ -26,15 +32,14 @@ namespace AppServiceApi.Models
             Request request = new Request();
             request.features = new List<Feature>();
             request.features.Add(feature);
+            request.features.Add(faceFeature);
             request.image = image;
             requests.Add(request);          
                 
-        }
-
-        
+        } 
         
     }
-
+       
     public class Request
     {
         public Image image { get; set; }
