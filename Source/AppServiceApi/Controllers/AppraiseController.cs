@@ -27,8 +27,16 @@ namespace AppServiceApi.Controllers
         public HttpResponseMessage GetVersion()
         {
             return Request.CreateResponse(HttpStatusCode.OK, new { message = "AppService 1.0.0.0" });            
-        }       
+        }
 
+        [HttpPost]
+        [Route("v1/microRating")]
+        public HttpResponseMessage MicroRating([FromBody]RatingInput ratingInput)
+        {
+            apiManager = new APIManager(token);
+            apiManager.getMicroRating(ratingInput.category, ratingInput.latitude, ratingInput.longitude, "CH");
+            return Request.CreateResponse(HttpStatusCode.OK, new { Rating = apiManager.ratingResponse.results.microRatingClass1To5 ?? 3.0 });
+        }
         
         [HttpPost]
         [Route("v1/register")]
@@ -62,14 +70,12 @@ namespace AppServiceApi.Controllers
 
                 apiManager = new APIManager(token);
 
-                //string userAgent = String.Empty;
+                string useragent = string.Empty;
 
-                //if (Request.Headers.UserAgent != null)
-                //    userAgent = Convert.ToString(Request.Headers.UserAgent);
+                if (Request.Headers.UserAgent != null)
+                    useragent = Convert.ToString(Request.Headers.UserAgent);               
 
-                string userAgent = String.Empty;
-
-                AppServiceApi.Models.AppraisalOutput appraisalOutput = apiManager.processImageLatLon(apiInput.imageBase64, apiInput.latitude, apiInput.longitude, apiInput.deviceId);
+                AppServiceApi.Models.AppraisalOutput appraisalOutput = apiManager.processImageLatLon(apiInput.imageBase64, apiInput.latitude, apiInput.longitude, apiInput.deviceId , useragent);
 
                 return Request.CreateResponse(HttpStatusCode.OK, appraisalOutput);
             }
@@ -93,13 +99,13 @@ namespace AppServiceApi.Controllers
                 if (!ModelState.IsValid)
                     return Request.CreateResponse(HttpStatusCode.BadRequest, ModelState);
 
-                //string userAgent = String.Empty;
+                string userAgent = String.Empty;
 
-                //if (Request.Headers.UserAgent != null)
-                //    userAgent = Convert.ToString(Request.Headers.UserAgent);
+                if (Request.Headers.UserAgent != null)
+                    userAgent = Convert.ToString(Request.Headers.UserAgent);
 
                 apiManager = new APIManager(token);
-                AppServiceApi.Models.AppraisalOutput appraisalOutput = apiManager.processDetailInput(detailInput);
+                AppServiceApi.Models.AppraisalOutput appraisalOutput = apiManager.processDetailInput(detailInput, userAgent);
                 return Request.CreateResponse(HttpStatusCode.OK, appraisalOutput);
             }
             catch (Exception ex)
@@ -124,8 +130,8 @@ namespace AppServiceApi.Controllers
 
                 string userAgent = String.Empty;
 
-                //if (Request.Headers.UserAgent != null)
-                //    userAgent = Convert.ToString(Request.Headers.UserAgent);
+                if (Request.Headers.UserAgent != null)
+                    userAgent = Convert.ToString(Request.Headers.UserAgent);
 
                 apiManager = new APIManager(token);
                 AppServiceApi.Models.OfferedRentOutput offeredRentOutput = apiManager.processImageLatLonForOfferedRent(apiInput.imageBase64, apiInput.lat, apiInput.lng, apiInput.deviceId, userAgent);
@@ -153,8 +159,8 @@ namespace AppServiceApi.Controllers
 
                 string userAgent = String.Empty;
 
-                //if (Request.Headers.UserAgent != null)
-                //    userAgent = Convert.ToString(Request.Headers.UserAgent);
+                if (Request.Headers.UserAgent != null)
+                    userAgent = Convert.ToString(Request.Headers.UserAgent);
 
                 AppServiceApi.Models.OfferedRentOutput offeredRentOutput = apiManager.processOfferedRentInput(offeredRentInput, userAgent);
 

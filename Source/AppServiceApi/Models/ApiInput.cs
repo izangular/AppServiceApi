@@ -6,7 +6,8 @@ using System.Linq;
 using System.Web;
 
 namespace AppServiceApi.Models
-{
+{   
+    
     public class ApiInput
     {
         [Required]

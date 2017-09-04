@@ -16,11 +16,8 @@ namespace AppServiceApi.Core.Repository
 
         #region Public Methods
 
-        public void savePricePropertyDetails(PriceData priceData)
-        {
-            //if (userAgent == null)
-              String  userAgent = String.Empty;
-
+        public void savePricePropertyDetails(PriceData priceData,string userAgent)
+        {          
             using (SqlCommand command = new SqlCommand())
             {
                 command.CommandType = CommandType.StoredProcedure;
@@ -57,10 +54,10 @@ namespace AppServiceApi.Core.Repository
             }
         }
 
-        public void saveRentPropertyDetails(RentData rentData)
+        public void saveRentPropertyDetails(RentData rentData, string userAgent)
         {
-            //if (userAgent == null)
-            String userAgent = String.Empty;
+            ////if (userAgent == null)
+            //String userAgent = String.Empty;
 
             using (SqlCommand command = new SqlCommand())
             {

@@ -56,6 +56,14 @@ namespace AppServiceApi.Util.Helper
             ImageCategory imageCategory = new ImageCategory();
             GoogleVisionApiOutput googleVisionApiOutput = AnalyseImage(imageBase64);
 
+            if (googleVisionApiOutput.responses[0].labelAnnotations == null && googleVisionApiOutput.responses[0].faceAnnotations == null)
+            {
+                imageCategory = new ImageCategory();
+                imageCategory.CategoryCode = -2;
+                imageCategory.CategoryText = "Invalid Image";
+                return imageCategory;
+            }
+
             if (googleVisionApiOutput.responses != null && googleVisionApiOutput.responses.Count > 0 && googleVisionApiOutput.responses[0].labelAnnotations.Count > 0)
             {
                 /* Mark the parameters */

@@ -31,9 +31,9 @@ namespace AppServiceApi.Util.Helper
                 token = srctoken;
 
             iaziClientsync = new IAZIClientSync();
-        }
+        }       
 
-        public AppraisalOutput processImageLatLon(string imageBase64 , double? latitude , double? longitude, string deviceId)
+        public AppraisalOutput processImageLatLon(string imageBase64 , double? latitude , double? longitude, string deviceId,string userAgent)
         {
             AppraisalOutput appraisalOutput = new AppraisalOutput();
             GoogleVisionApi googleVisionApi = new GoogleVisionApi();
@@ -50,8 +50,12 @@ namespace AppServiceApi.Util.Helper
             }
             catch(Exception)
             {
-                imageBase64 = getImageAndConvertbase64();
-                imageCategory = googleVisionApi.fetchCategoryForImage(imageBase64);
+               // imageBase64 = getImageAndConvertbase64();
+               // imageCategory = googleVisionApi.fetchCategoryForImage(imageBase64);
+                imageCategory = new ImageCategory();
+                imageCategory.CategoryCode = -2;
+                imageCategory.CategoryText = "Invalid Image";
+
             }
 
             getAddressForLatLong(latitude??0.0, longitude??0.0);
@@ -83,7 +87,8 @@ namespace AppServiceApi.Util.Helper
                 lng = (double)longitude;             
             }
 
-            if (imageCategory.CategoryCode != -1) { 
+            if (imageCategory.CategoryCode != -1 && imageCategory.CategoryCode != -2)
+            { 
                 getMicroRating(imageCategory.CategoryCode, lat ?? 0.0, lng ?? 0.0, countryCode);
                 priceInput.qualityMicro = appraisalOutput.microRating = ratingResponse.results.microRatingClass1To5 ?? 3;
             }
@@ -103,6 +108,7 @@ namespace AppServiceApi.Util.Helper
                      appraisalOutput.category = imageCategory.CategoryText; //" Condominium";
                      break;
                 case -1:
+                case -2:
                      appraisalOutput.category = imageCategory.CategoryText; //Set the first two labels that are returned by Google 
                      break;
                 default:
@@ -110,14 +116,14 @@ namespace AppServiceApi.Util.Helper
             }
 
 
-             if (imageCategory.CategoryCode != -1)
+            if (imageCategory.CategoryCode != -1 && imageCategory.CategoryCode != -2)
                 CalculatePrice(priceInput, imageCategory.CategoryCode, appraisalOutput);
 
             //Saving Property Details//
             try
             {
               PriceData priceData = MapPriceBuisnessDataToDatabaseModel(imageBase64, latitude, longitude, deviceId, appraisalOutput);
-               SavePricePropertyDetails(priceData);
+              SavePricePropertyDetails(priceData, userAgent);
             }
             catch(Exception ex)
             {
@@ -146,8 +152,12 @@ namespace AppServiceApi.Util.Helper
             }
             catch (Exception)
             {
-                imageBase64 = getImageAndConvertbase64();
-                imageCategory = googleVisionApi.fetchCategoryForImage(imageBase64);
+                //imageBase64 = getImageAndConvertbase64();
+                //imageCategory = googleVisionApi.fetchCategoryForImage(imageBase64);
+                imageCategory = new ImageCategory();
+                imageCategory.CategoryCode = -2;
+                imageCategory.CategoryText = "Invalid Image";
+
             }
           
             getAddressForLatLong(latitude ?? 0.0, longitude ?? 0.0);
@@ -188,7 +198,7 @@ namespace AppServiceApi.Util.Helper
                 };
             }
 
-            if (imageCategory.CategoryCode != -1)
+            if (imageCategory.CategoryCode != -1 && imageCategory.CategoryCode != -2)
             {
                 getMicroRating(imageCategory.CategoryCode, offeredRentInput.address.lat ?? 0.0, offeredRentInput.address.lng ?? 0.0, countryCode);
                 offeredRentInput.qualityMicro = offeredRentOutput.qualityMicro = ratingResponse.results.microRatingClass1To5 ?? 3;
@@ -213,20 +223,21 @@ namespace AppServiceApi.Util.Helper
                     offeredRentOutput.category = imageCategory.CategoryText; //" Condominium";
                     break;
                 case -1:
+                case -2:
                     offeredRentOutput.category = imageCategory.CategoryText;
                     break;
                 default:
                     break;
             }
 
-            if (imageCategory.CategoryCode != -1)
+            if (imageCategory.CategoryCode != -1 && imageCategory.CategoryCode != -2)
                 CalculateRent(offeredRentInput, offeredRentOutput);
 
             //Saving Property Details//
             try
             {
                 RentData rentData = MapRentBuisnessDataToDatabaseModel(imageBase64, latitude, longitude, deviceId, offeredRentOutput);
-                SaveRentPropertyDetails(rentData);
+                SaveRentPropertyDetails(rentData,userAgent);
 
             }
             catch( Exception ex)
@@ -240,7 +251,7 @@ namespace AppServiceApi.Util.Helper
         }
 
 
-        public AppraisalOutput processDetailInput(DetailInput detailInput)
+        public AppraisalOutput processDetailInput(DetailInput detailInput, string userAgent)
         {
             PriceInput priceInput = MapDetailInputToPriceInput(detailInput);
             AppraisalOutput appraisalOutput = new AppraisalOutput();
@@ -256,8 +267,8 @@ namespace AppServiceApi.Util.Helper
 
             ////Saving 
             try
-            { 
-                SavePricePropertyDetails(MapPriceBuisnessDataToDatabaseModel(null, null, null,detailInput.deviceId, appraisalOutput));
+            {
+                SavePricePropertyDetails(MapPriceBuisnessDataToDatabaseModel(null, null, null, detailInput.deviceId, appraisalOutput), userAgent);
 
             }
             catch(Exception ex)
@@ -283,8 +294,8 @@ namespace AppServiceApi.Util.Helper
 
             ////Saving 
             try
-            { 
-               SaveRentPropertyDetails(MapRentBuisnessDataToDatabaseModel(null, null, null, offeredRentInput.deviceId, offeredRentOutput));
+            {
+                SaveRentPropertyDetails(MapRentBuisnessDataToDatabaseModel(null, null, null, offeredRentInput.deviceId, offeredRentOutput), userAgent);
 
             }
             catch(Exception ex)
@@ -318,6 +329,14 @@ namespace AppServiceApi.Util.Helper
             string result = iaziClientsync.getApiResponse(url, token);
 
             return JObject.Parse(result);
+        }
+
+
+        public void getMicroRating(double cat, double lat, double lon, string country)
+        {            
+            string url = String.Format("{0}/{1}?cat={2}&countryCode={3}&lat={4}&lon={5}", ConfigurationManager.AppSettings["Server"], ConfigurationManager.AppSettings["MicroRating"], cat, country, lat, lon);
+            string result = iaziClientsync.getApiResponse(url, token);
+            ratingResponse = JsonConvert.DeserializeObject<RatingResponse>(result);
         }
 
         #region Private 
@@ -359,13 +378,6 @@ namespace AppServiceApi.Util.Helper
             priceInput.street        =   detailInput.street;
 
             return priceInput;
-        }
-
-        private void getMicroRating(double cat, double lat, double lon, string country)
-        {
-            string url = String.Format("{0}/{1}?cat={2}&countryCode={3}&lat={4}&lon={5}", ConfigurationManager.AppSettings["Server"], ConfigurationManager.AppSettings["MicroRating"], cat, country, lat, lon);
-            string result = iaziClientsync.getApiResponse(url,token);
-            ratingResponse = JsonConvert.DeserializeObject<RatingResponse>(result);                        
         }
 
         private int getOrtId(string country, double lat, double lon, string culture)
@@ -604,20 +616,23 @@ namespace AppServiceApi.Util.Helper
             {
                 priceData.realestateData.Image = imageBase64;
 
-                if (latitude != null)
-                priceData.realestateData.Latitude =  (decimal)latitude;
-
-                if (longitude !=null)
-                priceData.realestateData.Longitude = (decimal)longitude;                
-
-                using (var ms = new MemoryStream(Convert.FromBase64String(imageBase64)))
+                if (appraisalOutput.CatCode != -2)
                 {
-                    System.Drawing.Image img = System.Drawing.Image.FromStream(ms);
-                    priceData.realestateData.ImageSize = ms.Length / 1024;
-                    priceData.realestateData.ImageWidth = img.Width;
-                    priceData.realestateData.ImageHeight = img.Height;
+                    using (var ms = new MemoryStream(Convert.FromBase64String(imageBase64)))
+                    {
+                        System.Drawing.Image img = System.Drawing.Image.FromStream(ms);
+                        priceData.realestateData.ImageSize = ms.Length / 1024;
+                        priceData.realestateData.ImageWidth = img.Width;
+                        priceData.realestateData.ImageHeight = img.Height;
+                    }
                 }
             }
+
+            if (latitude != null)
+                priceData.realestateData.Latitude = (decimal)latitude;
+
+            if (longitude != null)
+                priceData.realestateData.Longitude = (decimal)longitude; 
 
             priceData.realestateData.DeviceId = deviceId;
 
@@ -651,16 +666,16 @@ namespace AppServiceApi.Util.Helper
         }
 
 
-        private void SavePricePropertyDetails(PriceData priceData)
+        private void SavePricePropertyDetails(PriceData priceData, string userAgent)
         {
             RealEstateRepository realEstateRepository = new RealEstateRepository();
-            realEstateRepository.savePricePropertyDetails(priceData);
+            realEstateRepository.savePricePropertyDetails(priceData, userAgent);
         }
 
-        private void SaveRentPropertyDetails(RentData rentData)
+        private void SaveRentPropertyDetails(RentData rentData, string userAgent)
         {
             RealEstateRepository realEstateRepository = new RealEstateRepository();
-            realEstateRepository.saveRentPropertyDetails(rentData);
+            realEstateRepository.saveRentPropertyDetails(rentData, userAgent);
         }
 
         private void GetImageSize(string base64Image, ref Int64 imageSize, ref int imageWidth, ref int imageHeight)
